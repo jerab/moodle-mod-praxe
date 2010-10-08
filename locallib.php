@@ -2,6 +2,19 @@
 
 define('PRAXE_TIME_TO_EDIT_SCHEDULE', 60*60*6); // hours before curent time when the availability of student to edit his schedule expires  
 
+define('PRAXE_SCHOOL_TYPE_1',1);
+define('PRAXE_SCHOOL_TYPE_1_TEXT',get_string('typeschool1','praxe'));
+define('PRAXE_SCHOOL_TYPE_2',2);
+define('PRAXE_SCHOOL_TYPE_2_TEXT',get_string('typeschool2','praxe'));
+define('PRAXE_SCHOOL_TYPE_3',3);
+define('PRAXE_SCHOOL_TYPE_3_TEXT',get_string('typeschool3','praxe'));
+define('PRAXE_SCHOOL_TYPE_4',4);
+define('PRAXE_SCHOOL_TYPE_4_TEXT',get_string('typeschool4','praxe'));
+define('PRAXE_SCHOOL_TYPE_5',5);
+define('PRAXE_SCHOOL_TYPE_5_TEXT',get_string('typeschool5','praxe'));
+define('PRAXE_SCHOOL_TYPE_6',6);
+define('PRAXE_SCHOOL_TYPE_6_TEXT',get_string('typeschool_other','praxe'));
+
 define('PRAXE_STATUS_ASSIGNED',0);
 define('PRAXE_STATUS_REFUSED',1);
 define('PRAXE_STATUS_CONFIRMED',2);
