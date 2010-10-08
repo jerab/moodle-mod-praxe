@@ -30,7 +30,8 @@ class praxe_addschool extends praxe_actionform {
 							PRAXE_SCHOOL_TYPE_2 => PRAXE_SCHOOL_TYPE_2_TEXT,
 							PRAXE_SCHOOL_TYPE_3 => PRAXE_SCHOOL_TYPE_3_TEXT,
 							PRAXE_SCHOOL_TYPE_4 => PRAXE_SCHOOL_TYPE_4_TEXT,
-							PRAXE_SCHOOL_TYPE_5 => PRAXE_SCHOOL_TYPE_5_TEXT);
+							PRAXE_SCHOOL_TYPE_5 => PRAXE_SCHOOL_TYPE_5_TEXT,
+							PRAXE_SCHOOL_TYPE_6 => PRAXE_SCHOOL_TYPE_6_TEXT);
 		$mform->addElement('select', 'type', get_string('schooltype', 'praxe'), $options);
 				
         $mform->addElement('text', 'street', get_string('street', 'praxe'), array('size'=>'64'));
