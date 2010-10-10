@@ -1,7 +1,8 @@
 <?php
-
+define('PRAXE_ISCED_0',0);
 define('PRAXE_ISCED_2',2);
 define('PRAXE_ISCED_3',3);
+define('PRAXE_ISCED_0_TEXT',get_string('all'));
 define('PRAXE_ISCED_2_TEXT',get_string('2ndlevelofeducation','praxe'));
 define('PRAXE_ISCED_3_TEXT',get_string('3rdlevelofeducation','praxe'));
 
