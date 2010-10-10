@@ -79,8 +79,10 @@ class praxe_view_editteacher extends praxe_view {
 				break;
 			case PRAXE_TAB_EDITTEACHER_LOCATIONS :
 				$schoolid = optional_param('schoolid', 0, PARAM_INT);
-				$locationid = optional_param('locationid', 0, PARAM_INT);
+				$locationid = optional_param('locationid', 0, PARAM_INT);								
 				$edit = optional_param('edit', null, PARAM_TEXT);
+				$factual = optional_param('factualloc', 0, PARAM_INT);
+				
 				require_once($CFG->dirroot . '/mod/praxe/view_headm.php');
 				if($schoolid == 0) {
 					$schoolid = null;					
@@ -95,7 +97,7 @@ class praxe_view_editteacher extends praxe_view {
 					$this->form->set_redirect_url(null, array('mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS], 'schoolid'=>$schoolid));
 					$this->form->set_form_to_edit($loc);					
 				}else{
-					$this->content .= praxe_view_headm::show_locations($schoolid,null,array('edit'=>'true', 'mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS],'schoolid'=>$schoolid));
+					$this->content .= praxe_view_headm::show_locations($schoolid,null,array('edit'=>'true', 'mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS],'schoolid'=>$schoolid),$factual);
 				}								
 				
 				break;
@@ -113,8 +115,8 @@ class praxe_view_editteacher extends praxe_view {
 	}
 
 	public function show_all_students_records() {
-		global $course, $CFG, $cm;				
-		if(is_array($records = praxe_get_praxe_records($cm->id))) {				
+		global $CFG;						
+		if(is_array($records = praxe_get_praxe_records(praxe_record::getData('id')))) {				
 			require_once($CFG->dirroot . '/mod/praxe/view_extteacher.php');
 			$this->content .= praxe_view_extteacher::show_records($records);			
 		}else {
