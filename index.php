@@ -80,7 +80,7 @@ foreach ($praxes as $praxe) {
         $link = '<a href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';
         $visi = get_string('yes');
     }
-    eval('$isced = PRAXE_ISCED_'.$praxe->isced.'_TEXT;');
+    $isced = praxe_get_isced_text($praxe->isced);    
     
     $part = '0';
     if(!empty($praxe->groupingid)) {    	
