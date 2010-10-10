@@ -148,7 +148,9 @@ function praxe_object_search($needle,$haystack,$arraykey=false)
 }
 
 function praxe_get_isced_text($isced) {
-	if($isced == PRAXE_ISCED_2) {
+	if($isced == PRAXE_ISCED_0) {
+		return PRAXE_ISCED_0_TEXT;
+	}elseif($isced == PRAXE_ISCED_2) {
 		return PRAXE_ISCED_2_TEXT;
 	}elseif($isced == PRAXE_ISCED_3) {
 		return PRAXE_ISCED_3_TEXT;
@@ -174,7 +176,7 @@ function praxe_get_term_text($term) {
  * @param bool $active [optional][default null] - true, false
  * @return array/false - result of get_records_sql() 
  */
-function praxe_get_locations($isced = null, $studyfield = null, $active = null) {
+function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
 	global $CFG;
 	$sql = "select loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
     			head.firstname as head_name, head.lastname as head_lastname, 
@@ -189,7 +191,8 @@ function praxe_get_locations($isced = null, $studyfield = null, $active = null) 
     			";
 	
 	$where = array();
-	if(!is_null($isced)) {
+	/// location for a specifit isced level ///
+	if($isced > 0) {
 		$where[] = "isced = ".(int)$isced;
 	}
 	if(!is_null($studyfield)) {
@@ -205,7 +208,7 @@ function praxe_get_locations($isced = null, $studyfield = null, $active = null) 
 	return get_records_sql($sql);
 }
 
-function praxe_get_locations_by_schooldata($schoolid = null, $headm = null) {
+function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOnlyActual = 0) {
 	global $CFG;
 	$sql = "select loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
     			head.firstname as head_name, head.lastname as head_lastname, 
@@ -225,6 +228,15 @@ function praxe_get_locations_by_schooldata($schoolid = null, $headm = null) {
 	if(!is_null($headm)) {
 		$where[] = "headmaster = ".(int)$headm;
 	}
+	if($bOnlyActual != 0) {
+		$where[] = "loc.year = ".praxe_record::getData('year');
+		$where[] = "loc.term = ".praxe_record::getData('term');
+		$where[] = "loc.studyfield = ".praxe_record::getData('studyfield');
+		if(praxe_record::getData('isced') > 0) {
+			$where[] = "loc.isced = ".praxe_record::getData('isced');
+		}
+	}
+	
 	if(count($where)) {
 		$sql .= " where ".implode(" AND ",$where);
 	}
@@ -255,27 +267,27 @@ function praxe_get_location($id, $teacherid = null) {
 	return get_record_sql($sql);
 }
 
-function praxe_get_available_locations($user, $isced = null, $studyfield = null) {
+function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	global $cm, $course, $CFG;	
 	if(!is_array($all = praxe_get_locations($isced, $studyfield, true))) {
 		return false;
 	}
-	/// used locations in this instance of praxe
+	
+	/// used locations in all instances of praxe, which are set iqual like this instance (term, year, studyfield,isced) ///
 	$sql = "select rec.location, rec.* from {$CFG->prefix}praxe_records as rec
     			inner join {$CFG->prefix}praxe as praxe on (praxe = praxe.id)
     			where year = ".date('Y',mktime())." AND term = ".praxe_record::getData('term')."
-    			AND studyfield = ".praxe_record::getData('studyfield')." AND isced = ".praxe_record::getData('isced')."
+    			AND studyfield = ".praxe_record::getData('studyfield')." 
     			AND (status <> ".PRAXE_STATUS_REFUSED." OR student = ".$user.")";
-	
-	if(!is_array($used = get_records_sql($sql))) {	
-		//print_object("used locations");
-		//print_object($sql);
-		//print_object($used);
+	/// selection of location with specific isced level ///
+	if($isced > 0) {
+		$sql .= "AND isced = ".praxe_record::getData('isced');
+	}
+	if(!is_array($used = get_records_sql($sql))) {		
 		return $all;
 	}	
 	$result = array_diff_key($all, $used);
-	//print_object("result");
-	//print_object($result);
+	
 	return $result;
 }
 /**
@@ -304,7 +316,7 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 			left join {$CFG->prefix}user as teacher on(ext_teacher = teacher.id)";
 			 
 	$where = array();
-	if(is_null($praxeid)) {
+	if(!is_null($praxeid)) {
 		$where[] = "praxe = $praxeid";
 	}
 	if(!is_null($teacherid)){
@@ -450,8 +462,8 @@ function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 	if(!is_array($order) || !count($order)) {
 		$order = array('timestart', 'timeend');
 	}
-	$sql .= " ORDER BY ".implode(' AND ',$order);	
-	$ret = get_records_sql($sql);
+	$sql .= " ORDER BY ".implode(', ',$order);		
+	$ret = get_records_sql($sql);	
 	if(!is_array($ret)) {
 		return $ret;
 	}
@@ -469,7 +481,7 @@ function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 			unset($rr[$insp->id]->firstname);
 			unset($rr[$insp->id]->lastname);
 		}
-	}	
+	}		
 	return $rr;	
 }
 
@@ -517,6 +529,9 @@ function praxe_get_school($schoolid) {
 
 function praxe_get_base_url($params = array()) {
 	global $CFG, $cm;
+	if(!is_array($params)){
+		$params = array();
+	}
 	array_unshift($params, "id=$cm->id");
 	return $CFG->wwwroot."/mod/praxe/view.php?".implode('&amp;',$params);
 }
@@ -618,8 +633,7 @@ function praxe_get_user_fullname($user) {
     } else {
         $profilelink = '<strong>'.fullname($user, has_capability('moodle/site:viewfullnames', $context)).'</strong>';
     }
-	return $profilelink;
-    //print_user_picture($user, $course->id, $user->picture, false, true, $piclink)      
+	return $profilelink;          
 }
 
 function praxe_get_yearclass($yearclass) {
@@ -657,9 +671,7 @@ class praxe_record {
 				praxe_record::$data->studyfield_name = $stf->name;
 				praxe_record::$data->studyfield_shortcut = $stf->shortcut;
 			}
-		}
-		
-		//print_object(praxe_record::$data);		
+		}		
 	}
 	
 	/**
