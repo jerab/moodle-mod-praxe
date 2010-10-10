@@ -63,39 +63,32 @@ switch($praxeaction) {
 		break;
 	case 'confirmschedule':
 		require_sesskey();
-		$schedules = get_records('praxe_schedules','record',praxe_record::getData('rec_id'));		
+		$teachermail = optional_param('mailtoextteacher', 0, PARAM_INT);
+		$praxe = praxe_record::getData();
+		$schedules = get_records('praxe_schedules','record',$praxe->rec_id);		
 		if(empty($schedules)) {
 			error(get_string('notallowedaction','praxe'));
 		}
 			
-		$post = (object) array('id'=>praxe_record::getData('rec_id'),'status'=>PRAXE_STATUS_SCHEDULE_DONE);
-		update_record('praxe_records',$post);
+		$post = (object) array('id'=>$praxe->rec_id,'status'=>PRAXE_STATUS_SCHEDULE_DONE);
+		if(update_record('praxe_records',$post) && $teachermail == 1) {			
+			$emfrom = get_user_info_from_db('id',$praxe->rec_student);
+			require_once($CFG->dirroot . '/mod/praxe/mailing.php');
+			$mail = new praxe_mailing();
+			$fak = new stdClass();
+			$fak->name = fullname($emfrom);			
+			$fak->school = s($praxe->location->name);		
+			$mail->setSubject(get_string('confirmschedule_mailsubject','praxe'));						
+			$emtext = get_string('confirmschedule_mail','praxe',$fak);
+			$mail->setPlain($emtext);
+			$mail->setHtml($emtext);			
+			$emuser = get_user_info_from_db('id',$praxe->location->teacherid);
+			$mail->mailToUser($emuser, $emfrom);			
+		};
+		
 		redirect(praxe_get_base_url());			
 		
-		break;
-	/*case 'viewschool':
-		$schoolid = optional_param('schoolid',null,PARAM_INT);
-		require_once($CFG->dirroot . '/mod/praxe/view_headm.php');
-		echo praxe_view_headm::show_school($schoolid);		
-		break;
-	case 'editschool':
-		$schoolid = optional_param('schoolid',null,PARAM_INT);		
-		/// no id or school doesn't exist ///
-		if(empty($schoolid) || !($school = praxe_get_school($schoolid))) {
-			error(get_string('notallowedaction','praxe'));
-		}
-		/// not allowed to edit any or this school ///
-		if(!praxe_has_capability('editanyschool') && !(praxe_has_capability('editownschool') && $school->headmaster == $USER->id)) {				
-			error(get_string('notallowedaction','praxe'));
-		}
-		
-		require_once($CFG->dirroot . '/mod/praxe/c_addschool.php');
-		$form = new praxe_addschool();
-		//print_object($school);
-		$form->set_form_to_edit($school);
-		$form->_form->display();
-		break;
-	*/			
+		break;	
 }
 $echo .= "</div>";
 echo $echo;// . praxe_praxehome_buttons();
