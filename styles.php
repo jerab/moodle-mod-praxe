@@ -57,3 +57,17 @@
 .mod-praxe div.inspector.right {
 	text-align: right;
 }
+
+.mod-praxe div.praxedisplay form.popupform {
+	margin-right: 20px;	
+}
+
+.mod-praxe div.praxedisplay .form.confirmschedule {
+	width: 300px;
+	margin: 20px auto;
+	text-align: left;	
+}
+
+.mod-praxe div.praxedisplay .form.confirmschedule div {
+	margin: 5px;	
+}
