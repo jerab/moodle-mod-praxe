@@ -102,12 +102,13 @@ class praxe_view_headm extends praxe_view {
 		$this->form = new praxe_addlocation();
 	}
 	
-	public function show_locations($schoolid = null, $headmid = null, $editlinkparams = array()) {
+	public function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0) {
 		global $USER, $CFG, $cm;
-		if(!is_array($locs = praxe_get_locations_by_schooldata($schoolid, $headmid))) {
+		if(!is_array($locs = praxe_get_locations_by_schooldata($schoolid, $headmid, $bOnlyActual))) {
 			$ret = get_string('nolocationsavailable','praxe');			
 			return $ret;
-		}		
+		}
+						
 		$table = new stdClass();
 		$h = array();
 		$h[] = get_string('school','praxe');
@@ -115,6 +116,8 @@ class praxe_view_headm extends praxe_view {
 		$h[] = get_string('extteacher','praxe');
 		$h[] = get_string('studyfield','praxe');
 		$h[] = get_string('iscedlevel','praxe');
+		$h[] = get_string('year','praxe');
+		$h[] = get_string('term','praxe');
 		$h[] = get_string('actual_status','praxe');
 		$h[] = get_string('active','praxe');
 		$table->head = $h;
@@ -138,6 +141,8 @@ class praxe_view_headm extends praxe_view {
 			 		
 			$row = array(s($loc->name), s($loc->subject), $teacher, $stf, 
 								praxe_get_isced_text($loc->isced),
+								s($loc->year),
+								praxe_get_term_text($loc->term),
 								$status,
 								$active);
 			if($editable) {				
