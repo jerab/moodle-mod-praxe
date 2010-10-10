@@ -38,10 +38,10 @@ class praxe_mailing {
 		$subject = format_string($site->shortname).": ".$this->subject;
 		
 		$result = email_to_user($userto, $userfrom, $subject, $plain, $html);		
-		if($result == true) {
+		if($result === true) {
 			return true;
 		}
-		$this->error .= "<div>".var_dump($result, true)."</div>";
+		//$this->error .= "<div>".var_dump($result, true)."</div>";
 		return false;	
 	}
 	
