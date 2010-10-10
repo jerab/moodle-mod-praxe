@@ -69,7 +69,8 @@ class mod_praxe_mod_form extends moodleform_mod {
 		}
 	
 	///	Adding the "isced" select field to choose the isced level for current course		
-		$options = array(	PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
+		$options = array(	PRAXE_ISCED_0 => PRAXE_ISCED_0_TEXT,
+							PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
 							PRAXE_ISCED_3 => PRAXE_ISCED_3_TEXT);
 		$mform->addElement('select', 'isced', get_string('iscedlevel', 'praxe'), $options);
 		$mform->addRule('isced', null, 'required', null, 'client');
