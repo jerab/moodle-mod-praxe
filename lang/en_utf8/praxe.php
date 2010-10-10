@@ -3,6 +3,7 @@ $string['2ndlevelofeducation'] = 'Lower secondary or second stage of basic educa
 $string['3rdlevelofeducation'] = '(Upper) secondary education';
 $string['active_records'] = 'Active records';
 $string['active'] = 'Active';
+$string['actual'] = 'Actual';
 $string['actual_practices'] = 'Actual practices';
 $string['actual_status'] = 'Actual status';
 $string['addlocation'] = 'Add new location';
@@ -28,6 +29,17 @@ $string['choosing_location'] = 'Choose location';
 $string['creating_schedule'] = 'Create schedule';
 $string['city'] = 'City';
 $string['configisceddescription'] = 'International Standard Classification of Education (ISCED)';
+$string['confirmedlocation'] = 'Your practice confirmed';
+$string['confirmlocation_mail'] = 'Dear student,'.
+									"\n".'you have been enroled for the practice from $a->studyfield at the school $a->school. Your mentor should be $a->name.'.									
+									"\n".'You should now fill in the lesson schedule form in the activity $a->praxename.'.
+									"\n\n".'Yours sincerely'.
+									"\n".'Moodle';
+$string['confirmschedule_mail'] = 'Dear user,'.
+									"\n".'The student $a->name has changed some parts of his schedule of the practice at the school $a->school.'.									
+									"\n\n".'Yours sincerely'.
+									"\n".'Moodle';
+$string['confirmschedule_mailsubject'] = 'Changes in the schedule';
 $string['confirmschedule_sendnotice'] = 'Confirm that your shedule is actual';
 $string['confirmorrefusestudent'] = 'Confirm or refuse student&apos;s practice';
 $string['contact'] = 'Contact';
@@ -41,6 +53,7 @@ $string['email'] = 'E-mail';
 $string['error_timeschedule'] = 'The begining of lesson must be before it&apos;s end.<br>You can add the lesson schedule 24 before it&apos;s begining at least.';
 $string['evaluated'] = 'Evaluated';
 $string['extteacher'] = 'External teacher';
+$string['filter'] = 'Filter';
 $string['gotoinspection'] = 'Go to inspection';
 $string['headmaster'] = 'Headmaster';
 $string['inspection'] = 'Teacher visit';
@@ -122,6 +135,7 @@ $string['schoolname'] = 'School name';
 $string['schoolroom'] = 'School room';
 $string['schools'] = 'Schools';
 $string['schooltype'] = 'School type';
+$string['sendinfotoextteacher'] = 'Inform External teacher by mail';
 $string['status'] = 'Status';
 $string['status_assigned_text'] = 'Waiting for the external teacher confirmation.';
 $string['status_closed_text'] = 'This practice has been closed.';

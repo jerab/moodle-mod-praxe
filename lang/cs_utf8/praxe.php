@@ -3,6 +3,7 @@ $string['2ndlevelofeducation'] = 'Nižší sekundární vzdělávání (ISCED 2)
 $string['3rdlevelofeducation'] = 'Vyšší sekundární vzdělávání (ISCED 3)';
 $string['active_records'] = 'Aktivní záznamy';
 $string['active'] = 'Aktivní';
+$string['actual'] = 'Aktuální';
 $string['actual_practices'] = 'Aktuální praxe';
 $string['actual_status'] = 'Aktuální stav';
 $string['addlocation'] = 'Vytvořit novou nabídku';
@@ -27,6 +28,17 @@ $string['choose_lesson_number_info'] = 'Vyberte číslo hodiny! Je důležité p
 $string['choosing_location'] = 'Vybraná škola';
 $string['city'] = 'Město';
 $string['configisceddescription'] = 'Stupeň vzdělávání podle ISCED';
+$string['confirmedlocation'] = 'Potvrzení přijetí na praxi';
+$string['confirmlocation_mail'] = 'Vážená studentko / studente,'.
+									"\n".'Vaše žádost o praxi v rámci studijního oboru $a->studyfield na škole $a->school u fakultního učitele $a->name byla přijata.'.									
+									"\n".'Nyní byste měl(a) v rámci činnosti $a->praxename vyplnit rozvrh Vaší výuky.'.
+									"\n\n".'S pozdravem'.
+									"\n".'Váš Moodle';
+$string['confirmschedule_mail'] = 'Vážený uživateli,'.
+									"\n".'Student $a->name provedl změny ve svém rozvrhu praxe na fakultní škole $a->school.'.									
+									"\n\n".'S pozdravem'.
+									"\n".'Váš Moodle';
+$string['confirmschedule_mailsubject'] = 'Změny v rozvrhu praxe';
 $string['confirmschedule_sendnotice'] = 'Potvrďte aktuálnost Vašeho rozvrhu';
 $string['confirmorrefusestudent'] = 'Potvrdit nebo zamítnout praxi studenta';
 $string['contact'] = 'Kontakt';
@@ -41,6 +53,7 @@ $string['email'] = 'E-mail';
 $string['error_timeschedule'] = 'Začátek hodiny musí začínat dříve dříve než konec hodiny.<br>Rozvrh hodiny je možné přidat nejpozději 24 hodin před začátkem hodiny.';
 $string['evaluated'] = 'Hodnocení praxe';
 $string['extteacher'] = 'Fakultní učitel';
+$string['filter'] = 'Filtrovat';
 $string['gotoinspection'] = 'Jít na hospitaci';
 $string['to_create_location_choose_school'] = 'Pro vytvoření nové nabídky vyberte konkrétní školu.';
 $string['headmaster'] = 'Ředitel';
@@ -122,6 +135,7 @@ $string['schoolname'] = 'Název školy';
 $string['schoolroom'] = 'Místnost';
 $string['schools'] = 'Školy';
 $string['schooltype'] = 'Typ školy';
+$string['sendinfotoextteacher'] = 'Zaslat informaci fakultnímu učiteli';
 $string['status'] = 'Stav';
 $string['status_assigned_text'] = 'Čeká se na potvrzení přijetí fakultním učitelem.';
 $string['status_closed_text'] = 'Tato praxe již byla uzavřena.';
