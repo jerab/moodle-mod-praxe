@@ -88,7 +88,7 @@
 						$mail = new praxe_mailing();
 						$stud = new stdClass();
 						$stud->name = fullname($emuser);
-						$stud->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));;
+						$stud->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));
 						$stud->subject = s($location->subject);
 						$stud->school = s($location->name);
 						$stud->studyfield = s(praxe_record::getData('studyfield_name'));
@@ -102,8 +102,9 @@
 						}			
 						
 					}					
-					$todisplay .= "<div>".get_string('mailnotsenttoexternalteacher','praxe')."</div>";
-					$todisplay .= "<div>".get_string('contactselectedschool','praxe')."</div>"; 
+					$msg = "<div>".get_string('mailnotsenttoexternalteacher','praxe')."</div>";
+					$msg .= "<div>".get_string('contactselectedschool','praxe')."</div>";
+					error($msg, praxe_get_base_url()); 
 				}				
 				
 				break;
@@ -229,7 +230,7 @@
 				$refuse = optional_param('submitrefuse',null);
 				$confirm = optional_param('submitconfirm',null);
 				if(!$record || !($refuse || $confirm)) {
-					error(get_string('notallowedaction','praxe'));
+					error(get_string('notallowedaction','praxe'));					
 				}				
 				if(!praxe_has_capability('confirmlocation') && !(praxe_has_capability('confirmownlocation') && $record->teacherid == $USER->id)) {				
 					error(get_string('notallowedaction','praxe'));
@@ -242,14 +243,30 @@
 					$msg = get_string('you_refused_location','praxe');					
 				}else if(!is_null($confirm)) {
 					$post->status = PRAXE_STATUS_CONFIRMED;
-					$msg = get_string('you_confirmed_location','praxe');
+					$msg = get_string('you_confirmed_location','praxe');					
 				}
 				
-				if(update_record('praxe_records',$post)) {
-					// ??? TODO - send email to student about confirmation ???
+				if(update_record('praxe_records',$post) && false) {					
+					if($post->status = PRAXE_STATUS_CONFIRMED) {
+						$emuser = get_user_info_from_db('id',$record->student);
+						$emfrom = get_user_info_from_db('id',$record->teacherid);
+						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
+						$mail = new praxe_mailing();
+						$fak = new stdClass();
+						$fak->name = fullname($emfrom);
+						$fak->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));
+						$fak->subject = s($record->subject);
+						$fak->school = s($record->name);
+						$fak->studyfield = s(praxe_record::getData('studyfield_name'));
+						$fak->praxename = praxe_record::getData('name');
+						$mail->setSubject(get_string('confirmedlocation','praxe'));						
+						$emtext = get_string('confirmlocation_mail','praxe',$fak);
+						$mail->setPlain($emtext);
+						$mail->setHtml($emtext);
+						$mail->mailToUser($emuser, $emfrom);	
+					}
 					redirect(praxe_get_base_url(), $msg);
-				}
-				//print_object($post);
+				}				
 				
 				break;
 			case ('makeschedule'):				
@@ -260,19 +277,19 @@
 				$post->lesnumber = optional_param('lesnumber',0,PARAM_INT);
 				$post->schoolroom = optional_param('schoolroom','',PARAM_TEXT);
 				$post->lestheme = optional_param('lestheme','');
-				
+				print_object($mode);
 								
 				$tstart = required_param('timestart');
 				$tend = required_param('timeend');
 				$post->timestart = mktime($tstart['hour'],$tstart['minute'], null, $tstart['month'],$tstart['day'],$tstart['year']);
 				$post->timeend = mktime($tend['hour'],$tend['minute'], null, $tend['month'],$tend['day'],$tend['year']);
 				if($post->timestart > $post->timeend || $post->timestart < mktime()+60*60*24) {
-					$redurl = praxe_get_base_url("mode=$mode");
+					$redurl = praxe_get_base_url(array('mode='.$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE]));					
 					redirect($redurl, get_string('error_timeschedule','praxe'));
 				}				
 				$post->record = praxe_record::getData('rec_id');
 				
-				$redurl = praxe_get_base_url().'&amp;mode='.$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE];
+				$redurl = praxe_get_base_url(array('mode='.$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
 				/// insert record ///				
 				if(empty($edit)) {
 					$post->timecreated = time();
@@ -288,11 +305,7 @@
 				}				
 				
 				break;
-			default:
-				echo "POST data:";
-    			print_object($_POST);
-	    		echo "object post:";
-    			print_object($post);			
+			default:							
 				break;
 	    endswitch;
     }
