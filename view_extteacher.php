@@ -89,11 +89,10 @@ class praxe_view_extteacher extends praxe_view {
 		}			
 	}
 
-	public function active_actual_user_records($userid, $praxeid=null, $order=null) {
-		global $cm;
+	public function active_actual_user_records($userid, $praxeid=null, $order=null) {		
 		$ret = array();
 		if(is_null($praxeid)) {
-			$praxeid = $cm->id;
+			$praxeid = praxe_record::getData('id');
 		}
 		$all = praxe_get_praxe_records($praxeid, $order);		
 		if(is_array($all)) {			

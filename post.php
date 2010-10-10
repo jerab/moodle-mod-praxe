@@ -87,7 +87,7 @@
 						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 						$mail = new praxe_mailing();
 						$stud = new stdClass();
-						$stud->name = fullname($emuser);
+						$stud->name = fullname($efrom);
 						$stud->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));
 						$stud->subject = s($location->subject);
 						$stud->school = s($location->name);

@@ -107,7 +107,7 @@
            	
            	if($tab == PRAXE_TAB_EXTTEACHER_HOME) {
            		$recordid = optional_param('recordid', 0, PARAM_INT);           		
-           		$records = praxe_get_praxe_records($cm->id, null, $USER->id);           		     		
+           		$records = praxe_get_praxe_records(praxe_record::getData('id'), null, $USER->id);           		     		
            		if(is_array($records)) {	
 	           		$options = array();
 	            	$options[0] = get_string('all');
