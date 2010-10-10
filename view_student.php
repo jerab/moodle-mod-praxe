@@ -100,15 +100,18 @@ class praxe_view_student extends praxe_view {
 					break;
 				case PRAXE_TAB_STUDENT_SCHEDULE :					
 					$editlinks = array("mode=".$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE], 'edit=editschedule');
-					$schedules = praxe_get_schedules(praxe_record::getData('rec_id'));
+					$schedules = praxe_get_schedules(praxe_record::getData('rec_id'),array('timestart','lesnumber'));
 					self::show_schedule($schedules, false, $editlinks);
 					/// schedule confirm form for validation /// 
 					if(is_array($schedules)) {
-						$f = '<form method="post">';
+						$f = '<form method="post" class="form confirmschedule center">';
 						$f .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />'
 							.'<input type="hidden" name="praxeaction" value="confirmschedule" />';
-						$f .= '<div class="fitem center" style="margin: 10px 0;">';
-						$f .= '<span>'.get_string('confirmschedule_sendnotice','praxe').':</span> ';
+						$f .= '<div>';
+						$f .= '<strong>'.get_string('confirmschedule_sendnotice','praxe').'</strong><br />';
+						$f .= get_string('sendinfotoextteacher','praxe').": ";
+						$f .= '<input type="checkbox" name="mailtoextteacher" value="1" checked="checked" />';
+						$f .= '</div><div class="center">';
 						$f .= '<input type="submit" name="confirmsubmitbutton" value="'.get_string('confirm').'" />';						
 						$f .= '</div>';
 						$f .= '</form>';
@@ -263,9 +266,10 @@ class praxe_view_student extends praxe_view {
 								get_string('schoolroom','praxe'),
 								get_string('subject','praxe'),
 								get_string('lesson_theme','praxe'),
-								get_string('edit')
+								get_string('edit'),
+								get_string('inspection','praxe')								
 							);
-		$table->align = array('left', 'center', 'center', 'center', 'center', 'left', 'left', 'center');
+		$table->align = array('left', 'center', 'center', 'center', 'center', 'left', 'left', 'center', 'center');
 		$table->data = array();
 		$editable = praxe_has_capability('editstudentschedule') || praxe_has_capability('manageallincourse');					
 		foreach($schedules as $item) {			
@@ -289,6 +293,14 @@ class praxe_view_student extends praxe_view {
 			}else {
 				$row[] = "---";
 			}
+			
+			$ins = "";
+			if(count($item->inspectors)) {				
+				foreach($item->inspectors as $insp) {
+					$ins .= "<div class=\"inspector right\"><img src=\"{$CFG->wwwroot}/mod/praxe/img/icon_inspect.gif\" alt=\"".get_string('inspection','praxe').":\" title=\"".get_string('inspection','praxe')."\" />&nbsp;".praxe_get_user_fullname($insp)."</div>";
+				}
+			}
+			$row[] = $ins; 
 			
 			$table->data[] = $row;
 		}
