@@ -348,7 +348,7 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 	global $CFG;
 	// show all schools //
-	$sql = "select school.*, headm.firstname, headm.lastname			
+	$sql = "select school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname			
 			from {$CFG->prefix}praxe_schools as school
     		left join {$CFG->prefix}user as headm on(headmaster = headm.id)
     		left join {$CFG->prefix}praxe_school_teachers as ext on(teacher_school = school.id)
@@ -367,8 +367,9 @@ function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 	if(count($where)) {
 		$sql .= ' where '.implode(' AND ',$where);
 	}
-	$order = ' ORDER BY name';
-	$sql .= ' GROUP BY school.id ORDER BY name';
+	
+	$sql .= ' GROUP BY school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname';
+	$sql .= ' ORDER BY name';	
 	return get_records_sql($sql);	
 }
 
