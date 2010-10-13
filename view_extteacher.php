@@ -208,24 +208,27 @@ class praxe_view_extteacher extends praxe_view {
 	public function show_record_detail($rec) {
 		global $mode, $USER, $CFG;
 		
+		/// left top table ///
 		$tab1 = new stdClass();
 		$tab1->align = array('right', 'left');
 		$tab1->width = '40%';
-		$tab1->class = "floatinfotable left";
+		$tab1->class = "floatinfotable left twocolstable";
 		$tab1->data[] = array(get_string('school','praxe').": ", $rec->name);
 		$tab1->data[] = array(get_string('subject','praxe').": ", $rec->subject);
 		if($USER->id != $rec->teacherid) {
 			$tab1->data[] = array(get_string('teacher','praxe').": ", praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname)));
 		}		
 		
+		/// right top table ///
 		$tab2 = new stdClass();
 		$tab2->align = array('right', 'left');
 		$tab2->width = '40%';
-		$tab2->class = "floatinfotable right";		
+		$tab2->class = "floatinfotable right twocolstable";		
 		$tab2->data[] = array(get_string('student', 'praxe').": ", praxe_get_user_fullname($rec->student));
 		$tab2->data[] = array(get_string('status','praxe').": ", praxe_get_status_info($rec->status));
 		
 		$return = print_table($tab1, true) . print_table($tab2, true) . '<div class="clearer"></div>';
+		$return .= "<h3>".get_string('schedule','praxe')."</h3>";
 		if(!is_array($schedules = praxe_get_schedules($rec->id))) {
 			return $return . get_string('no_schedule_items','praxe');
 		}		
@@ -235,27 +238,27 @@ class praxe_view_extteacher extends praxe_view {
 		foreach($schedules as $sch) {
 			if(!isset($sched[date("j_m",$sch->timestart)])) {
 				$sched[date("j_m",$sch->timestart)] = array('date'=>$sch->timestart);
-			}
-			//$sched[date("j_m",$sch->timestart)][count($sched[date("j_m",$sch->timestart)])-1] = $sch;
+			}			
 			$sched[date("j_m",$sch->timestart)][$sch->lesnumber] = $sch;
-			if(!in_array($sch->lesnumber,$cols)) {//count($sched[date("j_m",$sch->timestart)])-1 > count($cols)) {
+			if(!in_array($sch->lesnumber,$cols)) {
 				$cols[] = $sch->lesnumber;
 			}			   
 		}
-				
+		/// schedule table ///		
 		$tab3 = new stdClass();
 		sort($cols);		
 		$tab3->head = $cols;
 		array_unshift($tab3->head, get_string('date'));
 		for($i = 1; $i < count($tab3->head); $i++) {
-			$tab3->head[$i] .= ".".get_string('lesson','praxe');
+			$tab3->head[$i] = s($tab3->head[$i]).".".get_string('lesson','praxe');
 		}
-		$tab3->size = array('70px');		
-		//$tab3->cellpadding = "10";
-		//print_object($sched);
+		$tab3->size = array('70px');
+		//$tab3->class = 'scheduletable';
+		
 		foreach($sched as $row) {
-			$datetd = userdate($row['date'],get_string('strftimedayshort'));
+			$datetd = userdate($row['date'],get_string('strftimeday','praxe'))."<br />".userdate($row['date'],get_string('strftimedateshort'));
 			$r = array($datetd);
+			$r3 = "<th class=\"header first\">$datetd</th>";
 			foreach($cols as $k=>$c) {
 				if(isset($row[$c])) {
 					//if($row[$c]->lesnumber == $cols[$c]) {
@@ -281,44 +284,47 @@ class praxe_view_extteacher extends praxe_view {
 							$item .= $add_insp; 
 						}						
 						$r[] = $item;
+						$r3 .= "<td>$item</td>";
 						
 					//}
 				}else {
 					$r[] = '&nbsp;';
+					$r3 .= '<td>&nbsp;</td>';
 				}
 			}
-			$tab3->data[] = $r;
-		}		
-		return $return . print_table($tab3,true);
+			$tab3->data[] = $r3;
+		}
+		$t3 = "<table cellspacing=\"1\" class=\"scheduletable boxalignleft\">\n<tbody>\n";
+		$t3 .= "<tr>\n";
+		foreach($tab3->head as $i=>$th) {
+			if($i == 0) {
+				$t3 .= "<th class=\"header first\">$th</th>";
+			}else {
+				$t3 .= "<th class=\"header\">$th</th>";
+			}
+		}
+		$t3 .= "</tr>\n";
+		foreach($tab3->data as $tr) {		
+			$t3 .= "<tr>$tr</tr>";
+		}
+		$t3 .= "</tbody></table>";
+		return $return . $t3;// . print_table($tab3,true);
 	}
 	
 	public function show_schedule_detail($schedule) {
-		//print_object($schedule);
-		$tab1 = new stdClass();
 		
-		$tab1->head = array (get_string('date'), get_string('lesson','praxe'), get_string('time'), get_string('yearclass','praxe'), get_string('schoolroom','praxe'), get_string('subject','praxe'));
-		$tab1->align = array('left', 'center', 'center', 'center' , 'center', 'left');
-		$tab1->width = '80%';
-		$tab1->class = "praxe";
-		$row = array(userdate($schedule->timestart, get_string('strftimedayshort')),
-					s($schedule->lesnumber).".".get_string('lesson','praxe'),
-					userdate($schedule->timestart,get_string('strftimetime'))." - ".userdate($schedule->timeend,get_string('strftimetime')),
-					praxe_get_yearclass($schedule->yearclass),
-					s($schedule->schoolroom),
-					s($schedule->lessubject)
-					);		
-		
-		$tab1->data[] = $row;
 		$tab2 = new stdClass();		
 		$tab2->align = array('right', 'left');
-		$tab2->size = array('150px;');
-		$tab2->cellpadding = '10px';
-		$tab2->class = "praxe";
+		$tab2->size = array('150px');
+		$tab2->cellpadding = '2px';
+		$tab2->class = "twocolstable";
 		$tab2->data[] = array(get_string('time').": ", userdate($schedule->timestart, get_string('strftimedayshort'))."&nbsp;&nbsp;".userdate($schedule->timestart,get_string('strftimetime'))." - ".userdate($schedule->timeend,get_string('strftimetime')));
+		$tab2->data[] = array(get_string('schoolroom','praxe').": ", s($schedule->schoolroom));		
 		$tab2->data[] = array(get_string('yearclass','praxe').": ", praxe_get_yearclass($schedule->yearclass));
+		$tab2->data[] = array(get_string('subject','praxe').": ", s($schedule->lessubject));
 		$tab2->data[] = array(get_string('lesson_theme','praxe').": ", format_text($schedule->lestheme));
 		
-		return print_table($tab2,true);		
+		return "<h3>".get_string('lessondetail','praxe')."</h3>".print_table($tab2,true);		
 	}
 	
 	/**
