@@ -252,9 +252,7 @@ class praxe_view_extteacher extends praxe_view {
 		for($i = 1; $i < count($tab3->head); $i++) {
 			$tab3->head[$i] = s($tab3->head[$i]).".".get_string('lesson','praxe');
 		}
-		$tab3->size = array('70px');
-		//$tab3->class = 'scheduletable';
-		
+
 		foreach($sched as $row) {
 			$datetd = userdate($row['date'],get_string('strftimeday','praxe'))."<br />".userdate($row['date'],get_string('strftimedateshort'));
 			$r = array($datetd);
@@ -308,7 +306,7 @@ class praxe_view_extteacher extends praxe_view {
 			$t3 .= "<tr>$tr</tr>";
 		}
 		$t3 .= "</tbody></table>";
-		return $return . $t3;// . print_table($tab3,true);
+		return $return . $t3;
 	}
 	
 	public function show_schedule_detail($schedule) {
