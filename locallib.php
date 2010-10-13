@@ -1,7 +1,6 @@
-<?php 
+<?php
 
-define('PRAXE_TIME_TO_EDIT_SCHEDULE', 60*60*6); // hours before curent time when the availability of student to edit his schedule expires  
-
+define('PRAXE_TIME_TO_EDIT_SCHEDULE', 60*60*6); // hours before curent time when the availability of student to edit his schedule expires
 define('PRAXE_SCHOOL_TYPE_1',1);
 define('PRAXE_SCHOOL_TYPE_1_TEXT',get_string('typeschool1','praxe'));
 define('PRAXE_SCHOOL_TYPE_2',2);
@@ -70,33 +69,30 @@ $tab_modes = array(	'student' => array('home','myschool','schedule','editloc','a
 					
 require_once($CFG->dirroot . '/mod/praxe/lib.php');
 
-function praxe_array_search($needle,$haystack,$arraykey=false)
-{
-  if(!is_array($haystack))
-    return false;
-    
-  foreach($haystack as $key=>$value) {
-      $current_key=$key;
-  
-      if($arraykey){
-          if($needle == $value[$arraykey]){
-            return $key;
-          }
-  
-          if(praxe_array_search($needle,$value->$arraykey) == true) {
-            return $current_key;
-          }            
-      }else{            
-          if($needle == $value){
-            return $value;
-          }
-          
-          if(praxe_array_search($needle,$value) == true) {
-              return $current_key;
-          }            
-      }
-  }
-  return false;
+function praxe_array_search($needle,$haystack,$arraykey=false) {
+	if(!is_array($haystack)) {
+		return false;
+	}
+	
+	foreach($haystack as $key=>$value) {
+		$current_key=$key;
+		if($arraykey){
+			if($needle == $value[$arraykey]){
+				return $key;
+			}
+			if(praxe_array_search($needle,$value->$arraykey) == true) {
+				return $current_key;
+			}			
+		}else{			
+			if($needle == $value){
+				return $value;
+			}
+			if(praxe_array_search($needle,$value) == true) {
+				return $current_key;
+			}			
+		}
+	}
+	return false;
 }
 
 function praxe_has_capability($strcap) {
@@ -116,35 +112,29 @@ function praxe_praxehome_buttons($print = false) {
 	echo $ret;
 }
 
-
-
-function praxe_object_search($needle,$haystack,$arraykey=false)
-{
-  if(!is_array($haystack))
-    return false;
-    
-  foreach($haystack as $key=>$value) {
-      $current_key=$key;
-  
-      if($arraykey){
-          if($needle == $value->$arraykey){
-            return $key;
-          }
-  
-          if(praxe_object_search($needle,$value->$arraykey) == true) {
-            return $current_key;
-          }            
-      }else{            
-          if($needle == $value){
-            return $value;
-          }
-          
-          if(praxe_object_search($needle,$value) == true) {
-              return $current_key;
-          }            
-      }
-  }
-  return false;
+function praxe_object_search($needle,$haystack,$arraykey=false) {
+	if(!is_array($haystack)) {
+		return false;
+	}
+	foreach($haystack as $key=>$value) {
+		$current_key=$key;
+		if($arraykey){
+			if($needle == $value->$arraykey){
+				return $key;
+			}
+			if(praxe_object_search($needle,$value->$arraykey) == true) {
+				return $current_key;
+			}			
+		}else{			
+			if($needle == $value){
+				return $value;
+			}
+			if(praxe_object_search($needle,$value) == true) {
+				return $current_key;
+			}
+		}
+	}
+	return false;
 }
 
 function praxe_get_isced_text($isced) {
@@ -178,17 +168,16 @@ function praxe_get_term_text($term) {
  */
 function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
 	global $CFG;
-	$sql = "select loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
-    			head.firstname as head_name, head.lastname as head_lastname, 
-    			ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname,
+	$sql = "SELECT loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
+				head.firstname as head_name, head.lastname as head_lastname, 
+				ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname,
 				studyf.name as studyfieldname, studyf.shortcut    			 
-    			from {$CFG->prefix}praxe_locations as loc
-    			left join {$CFG->prefix}praxe_schools as school on (school = school.id)
-    			left join {$CFG->prefix}user as head on (head.id = school.headmaster)
-    			left join {$CFG->prefix}praxe_school_teachers as ext on (ext.id = loc.teacher) 
-    			left join {$CFG->prefix}user as teacher on (teacher.id = ext_teacher)
-    			left join {$CFG->prefix}praxe_studyfields as studyf on (studyf.id = studyfield)
-    			";
+				FROM {$CFG->prefix}praxe_locations loc
+				LEFT JOIN {$CFG->prefix}praxe_schools school ON (school = school.id)
+				LEFT JOIN {$CFG->prefix}user head ON (head.id = school.headmaster)
+				LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON (ext.id = loc.teacher) 
+				LEFT JOIN {$CFG->prefix}user teacher ON (teacher.id = ext_teacher)
+				LEFT JOIN {$CFG->prefix}praxe_studyfields studyf ON (studyf.id = studyfield)";
 	
 	$where = array();
 	/// location for a specifit isced level ///
@@ -202,7 +191,7 @@ function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
 		$where[] = ($active) ? 'active = 1' : 'active = 0';
 	}
 	if(count($where)) {
-		$sql .= " where ".implode(" AND ",$where);
+		$sql .= " WHERE ".implode(" AND ",$where);
 	}
 	//print_object($sql);
 	return get_records_sql($sql);
@@ -210,16 +199,16 @@ function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
 
 function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOnlyActual = 0) {
 	global $CFG;
-	$sql = "select loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
-    			head.firstname as head_name, head.lastname as head_lastname, 
-    			ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname,
+	$sql = "SELECT loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
+				head.firstname as head_name, head.lastname as head_lastname, 
+				ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname,
 				studyf.name as studyfieldname, studyf.shortcut    			 
-    			from {$CFG->prefix}praxe_locations as loc
-    			left join {$CFG->prefix}praxe_schools as school on (school = school.id)
-    			left join {$CFG->prefix}user as head on (head.id = school.headmaster)
-    			left join {$CFG->prefix}praxe_school_teachers as ext on (ext.id = loc.teacher) 
-    			left join {$CFG->prefix}user as teacher on (teacher.id = ext_teacher)
-    			left join {$CFG->prefix}praxe_studyfields as studyf on (studyf.id = studyfield)";
+				FROM {$CFG->prefix}praxe_locations loc
+				LEFT JOIN {$CFG->prefix}praxe_schools school ON (school = school.id)
+				LEFT JOIN {$CFG->prefix}user head ON (head.id = school.headmaster)
+				LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON (ext.id = loc.teacher) 
+				LEFT JOIN {$CFG->prefix}user teacher ON (teacher.id = ext_teacher)
+				LEFT JOIN {$CFG->prefix}praxe_studyfields studyf ON (studyf.id = studyfield)";
 		
 	$where = array();
 	if(!is_null($schoolid)) {
@@ -238,7 +227,7 @@ function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOn
 	}
 	
 	if(count($where)) {
-		$sql .= " where ".implode(" AND ",$where);
+		$sql .= " WHERE ".implode(" AND ",$where);
 	}
 	
 	//print_object($sql);
@@ -252,15 +241,15 @@ function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOn
  */
 function praxe_get_location($id, $teacherid = null) {
 	global $CFG;
-	$sql = "select loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
-    			head.firstname as head_name, head.lastname as head_lastname, 
-    			teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname 
-    			from {$CFG->prefix}praxe_locations as loc
-    			left join {$CFG->prefix}praxe_schools as school on (school = school.id)
-    			left join {$CFG->prefix}user as head on (head.id = school.headmaster)
-    			left join {$CFG->prefix}praxe_school_teachers as ext on (ext.id = loc.teacher)
-    			left join {$CFG->prefix}user as teacher on (teacher.id = ext_teacher) 
-    			where loc.id = $id";
+	$sql = "SELECT loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
+				head.firstname as head_name, head.lastname as head_lastname, 
+				teacher.id as teacherid, teacher.firstname as teacher_name, teacher.lastname as teacher_lastname
+				FROM {$CFG->prefix}praxe_locations loc
+				LEFT JOIN {$CFG->prefix}praxe_schools school ON (school = school.id)
+				LEFT JOIN {$CFG->prefix}user head ON (head.id = school.headmaster)
+				LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON (ext.id = loc.teacher)
+				LEFT JOIN {$CFG->prefix}user teacher ON (teacher.id = ext_teacher)
+				WHERE loc.id = $id";
 	if(!is_null($teacherid)) {
 		$sql .= " AND teacher.id = ".(int)$teacherid;
 	}
@@ -274,18 +263,19 @@ function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	}
 	
 	/// used locations in all instances of praxe, which are set iqual like this instance (term, year, studyfield,isced) ///
-	$sql = "select rec.location, rec.* from {$CFG->prefix}praxe_records as rec
-    			inner join {$CFG->prefix}praxe as praxe on (praxe = praxe.id)
-    			where year = ".date('Y',mktime())." AND term = ".praxe_record::getData('term')."
-    			AND studyfield = ".praxe_record::getData('studyfield')." 
-    			AND (status <> ".PRAXE_STATUS_REFUSED." OR student = ".$user.")";
+	$sql = "SELECT rec.location, rec.*
+				FROM {$CFG->prefix}praxe_records rec
+				INNER join {$CFG->prefix}praxe praxe ON (praxe = praxe.id)
+				WHERE year = ".date('Y',mktime())." AND term = ".praxe_record::getData('term')."
+				AND studyfield = ".praxe_record::getData('studyfield')." 
+				AND (status <> ".PRAXE_STATUS_REFUSED." OR student = ".$user.")";
 	/// selection of location with specific isced level ///
 	if($isced > 0) {
 		$sql .= "AND isced = ".praxe_record::getData('isced');
 	}
-	if(!is_array($used = get_records_sql($sql))) {		
+	if(!is_array($used = get_records_sql($sql))) {
 		return $all;
-	}	
+	}
 	$result = array_diff_key($all, $used);
 	
 	return $result;
@@ -306,14 +296,14 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 	global $CFG;
 		
 	$sql = "SELECT rec.*, loc.subject, loc.id as locid, school.name as schoolname, school.id as schoolid,
-			user.firstname, user.lastname, user.id as userid, ext.id as extteacherid,
+			stud.firstname, stud.lastname, stud.id as userid, ext.id as extteacherid,
 			teacher.id as teacherid, teacher.firstname as teacher_firstname, teacher.lastname as teacher_lastname 
-			from {$CFG->prefix}praxe_records as rec
-			left join {$CFG->prefix}praxe_locations as loc on(location = loc.id)
-			left join {$CFG->prefix}praxe_schools as school on(school = school.id)
-			left join {$CFG->prefix}user as user on(student = user.id)
-			left join {$CFG->prefix}praxe_school_teachers as ext on(teacher = ext.id)
-			left join {$CFG->prefix}user as teacher on(ext_teacher = teacher.id)";
+			FROM {$CFG->prefix}praxe_records rec
+			LEFT JOIN {$CFG->prefix}praxe_locations loc ON(location = loc.id)
+			LEFT JOIN {$CFG->prefix}praxe_schools school ON(school = school.id)
+			LEFT JOIN {$CFG->prefix}user stud ON(student = stud.id)
+			LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON(teacher = ext.id)
+			LEFT JOIN {$CFG->prefix}user teacher ON(ext_teacher = teacher.id)";
 			 
 	$where = array();
 	if(!is_null($praxeid)) {
@@ -326,7 +316,7 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 		$where[] = "rec.student = $studentid";
 	}
 	if(count($where)) {	
-		$sql .= ' where '.implode(' AND ',$where);
+		$sql .= ' WHERE '.implode(' AND ',$where);
 	}
 	
 	if(empty($order) || !is_array($order)) {
@@ -348,12 +338,12 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 	global $CFG;
 	// show all schools //
-	$sql = "select school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname			
-			from {$CFG->prefix}praxe_schools as school
-    		left join {$CFG->prefix}user as headm on(headmaster = headm.id)
-    		left join {$CFG->prefix}praxe_school_teachers as ext on(teacher_school = school.id)
-    		left join {$CFG->prefix}user as teacher on(ext_teacher = teacher.id)
-    		left join {$CFG->prefix}praxe_locations as loc on(loc.school = school.id)";		
+	$sql = "SELECT school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname			
+			FROM {$CFG->prefix}praxe_schools school
+			LEFT JOIN {$CFG->prefix}user headm ON(headmaster = headm.id)
+			LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON(teacher_school = school.id)
+			LEFT JOIN {$CFG->prefix}user teacher ON(ext_teacher = teacher.id)
+			LEFT JOIN {$CFG->prefix}praxe_locations loc ON(loc.school = school.id)";		
 	$where = array();
 	if(!is_null($headmst)){
 		$where[] = "headmaster = $headmst";
@@ -365,7 +355,7 @@ function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 		$where[] = "loc.id = $location";
 	}
 	if(count($where)) {
-		$sql .= ' where '.implode(' AND ',$where);
+		$sql .= ' WHERE '.implode(' AND ',$where);
 	}
 	
 	$sql .= ' GROUP BY school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname';
@@ -376,53 +366,53 @@ function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 function praxe_get_ext_teachers_at_school($headm = null, $schoolid = null) {
 	global $CFG;
 	// get all info about school //	
-	$sql = "select ext_teach.id as ext_teacher_id, user.firstname as headm_firstname, user.lastname as headm_lastname,
+	$sql = "SELECT ext_teach.id as ext_teacher_id, head.firstname as headm_firstname, head.lastname as headm_lastname,
 			teacher.id as teacherid, teacher.firstname as firstname, teacher.lastname as lastname,
 			school.id as schoolid, school.name, school.street, school.city, school.headmaster       
-			from {$CFG->prefix}praxe_school_teachers as ext_teach			
-    		left join {$CFG->prefix}praxe_schools as school on (school.id = teacher_school)
-			left join {$CFG->prefix}user as user on (headmaster = user.id)    		
-    		left join {$CFG->prefix}user as teacher on (ext_teacher = teacher.id)";
-    $where = array();
+			FROM {$CFG->prefix}praxe_school_teachers ext_teach			
+			LEFT JOIN {$CFG->prefix}praxe_schools school ON (school.id = teacher_school)
+			LEFT JOIN {$CFG->prefix}user head ON (headmaster = head.id)    		
+			LEFT JOIN {$CFG->prefix}user teacher ON (ext_teacher = teacher.id)";
+	$where = array();
 	if(!is_null($headm)){
 		$where[] = "headmaster = ".(int)$headm;
 	}
 	if(!is_null($schoolid)) {
 		$where[] = "school.id = ".(int)$schoolid;
 	}
-    if(count($where)) {		
-    	$sql .= " WHERE ".implode(" AND ",$where);
-    }    			
+	if(count($where)) {		
+		$sql .= " WHERE ".implode(" AND ",$where);
+	}				
 	
-    $sql .= " ORDER BY school.name, lastname, firstname";
-    
-    //print_object($sql);
+	$sql .= " ORDER BY school.name, lastname, firstname";
+	
+	//print_object($sql);
 	return get_records_sql($sql);				
 }
 
 function praxe_get_record($recordid) {
 	global $CFG;
-	$sql = "SELECT rec.*, user.id as userid, user.firstname, user.lastname, 
+	$sql = "SELECT rec.*, stud.id as userid, stud.firstname, stud.lastname, 
 			subject, loc.id as locationid, name as name,
 			ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_firstname, teacher.lastname as teacher_lastname 
-			from {$CFG->prefix}praxe_records as rec
-			left join {$CFG->prefix}user as user on(user.id = rec.student) 
-			left join {$CFG->prefix}praxe_locations as loc on(location = loc.id)
-			left join {$CFG->prefix}praxe_schools as school on(school = school.id)
-			left join {$CFG->prefix}praxe_school_teachers as ext on(teacher = ext.id)
-			left join {$CFG->prefix}user as teacher on(teacher.id = ext_teacher)						
-			where rec.id = $recordid";	
+			FROM {$CFG->prefix}praxe_records rec
+			LEFT JOIN {$CFG->prefix}user stud ON(stud.id = rec.student) 
+			LEFT JOIN {$CFG->prefix}praxe_locations loc ON(location = loc.id)
+			LEFT JOIN {$CFG->prefix}praxe_schools school ON(school = school.id)
+			LEFT JOIN {$CFG->prefix}praxe_school_teachers ext ON(teacher = ext.id)
+			LEFT JOIN {$CFG->prefix}user teacher ON(teacher.id = ext_teacher)						
+			WHERE rec.id = $recordid";	
 	return get_record_sql($sql);
 }
 
 function praxe_get_schedule($schid) {
 	global $CFG;
 	$sql = "SELECT sch.*, rec.status, rec.praxe, rec.student, schins.schedule, schins.inspector, inspect.firstname, inspect.lastname
-			FROM {$CFG->prefix}praxe_schedules as sch
-			left join {$CFG->prefix}praxe_records as rec on(rec.id = sch.record) 
-			left join {$CFG->prefix}praxe_schedule_inspections as schins on(schedule = sch.id)
-			left join {$CFG->prefix}user as inspect on(inspect.id = inspector)						
-			where sch.id = $schid";	
+			FROM {$CFG->prefix}praxe_schedules sch
+			LEFT JOIN {$CFG->prefix}praxe_records rec ON(rec.id = sch.record) 
+			LEFT JOIN {$CFG->prefix}praxe_schedule_inspections schins ON(schedule = sch.id)
+			LEFT JOIN {$CFG->prefix}user inspect ON(inspect.id = inspector)						
+			WHERE sch.id = $schid";	
 	$ret = get_records_sql($sql);
 	if(!is_array($ret)) {
 		return $ret;
@@ -452,10 +442,10 @@ function praxe_get_schedule($schid) {
 function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 	global $CFG;
 	$sql = 	"SELECT sch.*, rec.status, rec.praxe, rec.student, schins.schedule, schins.inspector, inspect.firstname, inspect.lastname
-			FROM {$CFG->prefix}praxe_schedules as sch
-			left join {$CFG->prefix}praxe_records as rec on(rec.id = sch.record) 
-			left join {$CFG->prefix}praxe_schedule_inspections as schins on(schedule = sch.id)
-			left join {$CFG->prefix}user as inspect on(inspect.id = inspector) 
+			FROM {$CFG->prefix}praxe_schedules sch
+			LEFT JOIN {$CFG->prefix}praxe_records rec ON(rec.id = sch.record) 
+			LEFT JOIN {$CFG->prefix}praxe_schedule_inspections schins ON(schedule = sch.id)
+			LEFT JOIN {$CFG->prefix}user inspect ON(inspect.id = inspector) 
 			WHERE record=$recid";
 	if(!$incDeleted) {
 		$sql .= " AND sch.deleted IS NULL";
@@ -492,14 +482,14 @@ function praxe_get_school($schoolid) {
 		return false;
 	}
 	// get all info about school //	
-	$sql = "select school.*, user.firstname as headm_firstname, user.lastname as headm_lastname,
+	$sql = "SELECT school.*, head.firstname as headm_firstname, head.lastname as headm_lastname,
 			ext_teach.id as ext_teacher_id, teacher.id as teacher_id, teacher.firstname as teacher_firstname,
 			teacher.lastname as teacher_lastname      
-			from {$CFG->prefix}praxe_schools as school
-    		left join {$CFG->prefix}user as user on (headmaster = user.id)
-    		left join {$CFG->prefix}praxe_school_teachers as ext_teach on (school.id = teacher_school)
-    		left join {$CFG->prefix}user as teacher on (ext_teacher = teacher.id)
-    		where school.id=$schoolid";    			
+			FROM {$CFG->prefix}praxe_schools school
+			LEFT JOIN {$CFG->prefix}user head ON (headmaster = head.id)
+			LEFT JOIN {$CFG->prefix}praxe_school_teachers ext_teach ON (school.id = teacher_school)
+			LEFT JOIN {$CFG->prefix}user teacher ON (ext_teacher = teacher.id)
+			WHERE school.id=$schoolid";    			
 	
 	if(!is_array($res = get_records_sql($sql))) {
 		return false;
@@ -577,20 +567,21 @@ function praxe_get_status_info($statusvalue) {
 
 function praxe_get_stud_record($userid) {
 	global $CFG;
-	$sql = "SELECT user.id as userid, user.firstname, user.lastname, 
+	$sql = "SELECT stud.id as userid, stud.firstname, stud.lastname, 
 			rec.*, subject, name as schoolname 
-			from {$CFG->prefix}user as user
-			left join {$CFG->prefix}praxe_records as rec on(student = user.id) 
-			left join {$CFG->prefix}praxe_locations as loc on(location = loc.id)
-			left join {$CFG->prefix}praxe_schools as school on(school = school.id)			
-			where user.id = $userid";	
+			FROM {$CFG->prefix}user stud
+			LEFT JOIN {$CFG->prefix}praxe_records rec ON(student = stud.id) 
+			LEFT JOIN {$CFG->prefix}praxe_locations loc ON(location = loc.id)
+			LEFT JOIN {$CFG->prefix}praxe_schools school ON(school = school.id)			
+			WHERE user.id = $userid";	
 	return get_record_sql($sql);
 }
 
 function praxe_get_use_status_of_location($locid, $year=null) {
 	global $CFG;
 	$sql = "SELECT rec.*, stud.firstname, stud.lastname 
-			FROM {$CFG->prefix}praxe_records as rec left join {$CFG->prefix}user as stud on(student = stud.id)
+			FROM {$CFG->prefix}praxe_records rec
+			LEFT JOIN {$CFG->prefix}user stud ON(student = stud.id)
 			WHERE rec.location = $locid";
 	if(!is_null($year)) {
 		$sql .= " AND year = ".(int)$year;
@@ -622,18 +613,18 @@ function praxe_get_user_fullname($user) {
 	
 	$usercontext = get_context_instance(CONTEXT_USER, $user->id);
 	$contextcanviewdetails = has_capability('moodle/user:viewdetails', $context);
-    $usercontextcanviewdetails = has_capability('moodle/user:viewdetails', $usercontext);
+	$usercontextcanviewdetails = has_capability('moodle/user:viewdetails', $usercontext);
 
-    if ($piclink = ($USER->id == $user->id || $contextcanviewdetails || $usercontextcanviewdetails)) {
-    	if ($usercontextcanviewdetails) {
-        	$canviewfullname = has_capability('moodle/site:viewfullnames', $usercontext);
-        } else {
-        	$canviewfullname = has_capability('moodle/site:viewfullnames', $context);
-        } 
-        $profilelink = '<strong><a href="'.$CFG->wwwroot.'/user/view.php?id='.$user->id.'&amp;course='.$course->id.'">'.fullname($user, $canviewfullname).'</a></strong>';
-    } else {
-        $profilelink = '<strong>'.fullname($user, has_capability('moodle/site:viewfullnames', $context)).'</strong>';
-    }
+	if ($piclink = ($USER->id == $user->id || $contextcanviewdetails || $usercontextcanviewdetails)) {
+		if ($usercontextcanviewdetails) {
+			$canviewfullname = has_capability('moodle/site:viewfullnames', $usercontext);
+		} else {
+			$canviewfullname = has_capability('moodle/site:viewfullnames', $context);
+		} 
+		$profilelink = '<strong><a href="'.$CFG->wwwroot.'/user/view.php?id='.$user->id.'&amp;course='.$course->id.'">'.fullname($user, $canviewfullname).'</a></strong>';
+	} else {
+		$profilelink = '<strong>'.fullname($user, has_capability('moodle/site:viewfullnames', $context)).'</strong>';
+	}
 	return $profilelink;          
 }
 

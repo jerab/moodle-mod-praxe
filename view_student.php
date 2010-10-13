@@ -39,7 +39,7 @@ class praxe_view_student extends praxe_view {
 						$this->content .= self::make_assigntolocation_form();
 						$this->content .= "<hr>";
 					}else if($status == PRAXE_STATUS_REFUSED) {										
-						self::make_assigntolocation_form();	
+						$this->content .= self::make_assigntolocation_form();	
 					
 					}else if($status == PRAXE_STATUS_ASSIGNED) {								
 					

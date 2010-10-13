@@ -51,56 +51,55 @@ $timenow  = time();
 $strname  = get_string('name');
 $strweek  = get_string('week');
 $strdesc = get_string('description');
-$strvisi = get_string('visible');
 $strisced = get_string('iscedlevel', 'praxe');
 $stryear = get_string('year', 'praxe');
 $strterm = get_string('term', 'praxe');
 $strdate = get_string('dateofpraxe', 'praxe');
-$strpart = get_string('participants');
+$strnumofrec = get_string('numberofrecords', 'praxe');
+$strpart = get_string('participants')." (".get_string('groups').")";
 
 /*if ($course->format == 'weeks') {
     $table->head  = array ($strweek, $strname);
     $table->align = array ('center', 'left');
     
 } else if ($course->format == 'topics') {*/
-    $table->head  = array ($strname, $strdesc, $strisced, $stryear, $strterm, $strdate, $strpart, $strvisi);
+    $table->head  = array ($strname, $strdesc, $strisced, $stryear, $strterm, $strdate, $strnumofrec, $strpart);
     $table->align = array ('center', 'left', 'center', 'center', 'center', 'center', 'center', 'center');
 /*} else {
    	$table->head  = array ($strname);
     $table->align = array ('left', 'left', 'left');	
-}*/
-    
+}*/   
 foreach ($praxes as $praxe) {
-    if (!$praxe->visible) {
+	if(! $records = get_records('praxe_records','praxe',$praxe->id)) {
+		$numofrecords = 0;
+	}else {
+		$numofrecords = count($records);
+	}    
+	if (!$praxe->visible) {
         //Show dimmed if the mod is hidden
-        $link = '<a class="dimmed" href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';
-        $visi = get_string('no');
+        $link = '<a class="dimmed" href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';        
     } else {
         //Show normal if the mod is visible
-        $link = '<a href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';
-        $visi = get_string('yes');
+        $link = '<a href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';        
     }
     $isced = praxe_get_isced_text($praxe->isced);    
     
     $part = '0';
     if(!empty($praxe->groupingid)) {    	
-    	$groups = get_records_sql("SELECT g.* from {$CFG->prefix}groupings_groups as gg 
-    								left join {$CFG->prefix}groups as g on(groupid = g.id) 
-    								where groupingid = $praxe->groupingid");
+    	$groups = get_records_sql("SELECT g.* 
+    								FROM {$CFG->prefix}groupings_groups gg 
+    								LEFT JOIN {$CFG->prefix}groups g on(groupid = g.id) 
+    								WHERE groupingid = $praxe->groupingid");
     	$aPart = array();
     	foreach($groups as $group) {
     		$participants = get_group_students($group->id);
     		$aPart[] = '<a href="'.$CFG->wwwroot.'/user/index.php?id='.$course->id.'&amp;group='.$group->id.'">'.$group->name.'('.count($participants).')</a>';
     	}
-    	$part = implode(',',$aPart);    	
+    	$part = implode(', ',$aPart);    	
     }
     
     $date = userdate($praxe->datestart, get_string('strftimedateshort'))." - ".userdate($praxe->dateend, get_string('strftimedateshort'));
-    //if ($course->format == 'weeks' or $course->format == 'topics') {
-        $table->data[] = array ($link, $praxe->description, $isced, $praxe->year, $praxe->term, $date, $part, $visi);
-    /*} else {
-        $table->data[] = array ($link);
-    }*/
+    $table->data[] = array ($link, s($praxe->description), $isced, s($praxe->year), praxe_get_term_text($praxe->term), $date, $numofrecords, $part);
 }
 
 print_heading($strpraxes);

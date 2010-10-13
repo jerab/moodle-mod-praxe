@@ -71,8 +71,7 @@
             		}
 	            	 
 	            	$url = $CFG->wwwroot."/mod/praxe/view.php?id=$cm->id&amp;mode=".$mode."&amp;schoolid=";	            	
-	           		$tab_content .= popup_form($url, $options, 'praxepop_praxeschoolselect', $viewschool, '', '', '', true, 'self', get_string('school','praxe'));
-	            	$tab_content .= '<hr>';
+	           		$tab_content .= popup_form($url, $options, 'praxepop_praxeschoolselect', $viewschool, '', '', '', true, 'self', get_string('school','praxe'));	            	
            		}
            		$url = $CFG->wwwroot.'/mod/praxe/view.php?id='.$cm->id.'&amp;schoolid='.$viewschool;
            		if($schools) {
@@ -101,7 +100,6 @@
 		            	
 	           		$url = $CFG->wwwroot."/mod/praxe/view.php?id=$cm->id&amp;mode=".$mode."&amp;schoolid=";
 		            $tab_content .= popup_form($url, $options, 'praxepop_praxeschoolselect', $viewschool, '', '', '', true, 'self', get_string('school','praxe'));
-		            $tab_content .= '<hr>';
            		}	
            	}
            	
@@ -117,7 +115,6 @@
 		            	
 	           		$url = praxe_get_base_url(array("mode=$mode","recordid="));
 		            $tab_content .= popup_form($url, $options, 'praxepop_recorddetail', $recordid, '', '', '', true, 'self', get_string('praxe','praxe'));
-		            $tab_content .= '<hr>';
            		}
            	}
            	
@@ -143,7 +140,6 @@
 		            	
 	           		$url = praxe_get_base_url(array("mode=$mode","recordid="));
 		            $tab_content .= popup_form($url, $options, 'praxepop_recorddetail', $recordid, '', '', '', true, 'self', get_string('praxe','praxe'));
-		            $tab_content .= '<hr>';
            		}
            	}           	
            	             
@@ -151,7 +147,6 @@
             	$activated[] = PRAXE_TAB_EDITTEACHER_SCHOOLS;            	
             	/// school list exists ///
             	if(is_array($schools = praxe_get_schools())) {
-	            	//print_object($schools);
             			            	
 	            	/// schoolid is not valid(for this user at least) or viewschool is null => set to default view of schools///
 	            	if(!array_key_exists($viewschool, $schools)) {
@@ -205,11 +200,6 @@
             	$filterurl .= "&amp;factualloc=";
             	$tab_content .= popup_form($filterurl, $options, 'praxepop_praxelocationsselect', $filteractualloc, '', '', '', true, 'self', get_string('filter','praxe'));
            	}
-           	
-           	if(isset($filterurl)) {
-           		$tab_content .= "<hr />";
-           	}
-            
         	
            	break;
         default :
@@ -244,7 +234,8 @@
 
 <?php //if (count($viewtabrows)) { 
 	print_tabs($tabrows, $tab, $inactive, $activated);
-	echo $tab_content; 
-//} 
+	if(strlen($tab_content)) {
+		echo "<div class=\"filterselector\">$tab_content</div><hr />";
+	} 
 ?>
   <div class="entrybox">
