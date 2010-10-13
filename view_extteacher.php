@@ -156,7 +156,7 @@ class praxe_view_extteacher extends praxe_view {
 	private function show_all_my_locations() {		
 		global $USER, $CFG, $tab_modes;
 		
-		if(!is_array($all = praxe_get_locations())) {
+		if(!is_array($all = praxe_get_locations(null, null, null, true))) {
 			return '';
 		}
 		$table = new stdClass();
@@ -165,8 +165,8 @@ class praxe_view_extteacher extends praxe_view {
 		$strstudy = get_string('studyfield','praxe');		
 		$strisced = get_string('iscedlevel','praxe');
 		$stryear = get_string('year','praxe');
-		$strterm = get_string('term','praxe');
-		$table->head = array($strname, $strsubject, $strisced, $strstudy, $stryear, $strterm, get_string('edit')); 
+		$strterm = get_string('term','praxe');		
+		$table->head = array($strname, $strsubject, $strisced, $strstudy, $stryear, $strterm, get_string('active','praxe'), get_string('edit')); 
 		//$table->head[] = get_string('create_new_by_copy','praxe');
 		$table->align = array ('left', 'left', 'left', 'left', 'center', 'center', 'center');
 		//$table->align[] = 'center';
@@ -179,6 +179,7 @@ class praxe_view_extteacher extends praxe_view {
 			$row = array(s($loc->name), s($loc->subject), praxe_get_isced_text($loc->isced), s($loc->studyfieldname)." (".s($loc->shortcut).")");
 			$row[] = s($loc->year);
 			$row[] = praxe_get_term_text($loc->term);
+			$row[] = ($loc->active == 1) ? get_string('yes') : get_string('no');
 			if(praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && $USER->id == $loc->teacherid)
 				&& !get_record('praxe_records','location',$loc->id)) {
 				$par = "&amp;mode=".$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_EDITLOCATION]."&amp;locationid=$loc->id";				
@@ -191,7 +192,6 @@ class praxe_view_extteacher extends praxe_view {
 			//$row[] = "<a title=\"".get_string('copy')."\" href=\"".praxe_get_base_url().$par."\">".get_string('copy')."</a> ";
 			
 			$data[] = $row;			 
-			//print_object($loc);
 		}
 		if(count($data)) {
 			$table->data = $data;

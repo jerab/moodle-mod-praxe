@@ -164,9 +164,10 @@ function praxe_get_term_text($term) {
  * @param int $isced [optional][default null]
  * @param int $studyfield [optional][default null]
  * @param bool $active [optional][default null] - true, false
+ * @param bool bOnlyActual[optional] - if is set to true or 1 select ignore all params before and returns only locations for this instance of praxe
  * @return array/false - result of get_records_sql() 
  */
-function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
+function praxe_get_locations($isced = 0, $studyfield = null, $active = null, $bOnlyActual = 0) {
 	global $CFG;
 	$sql = "SELECT loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
 				head.firstname as head_name, head.lastname as head_lastname, 
@@ -180,15 +181,24 @@ function praxe_get_locations($isced = 0, $studyfield = null, $active = null) {
 				LEFT JOIN {$CFG->prefix}praxe_studyfields studyf ON (studyf.id = studyfield)";
 	
 	$where = array();
-	/// location for a specifit isced level ///
-	if($isced > 0) {
-		$where[] = "isced = ".(int)$isced;
-	}
-	if(!is_null($studyfield)) {
-		$where[] = "studyfield = ".(int)$studyfield;
-	}
-	if(!is_null($active)) {
-		$where[] = ($active) ? 'active = 1' : 'active = 0';
+	/// location for a specifit isced level ///	
+	if($bOnlyActual) {
+		$where[] = "loc.year = ".praxe_record::getData('year');
+		$where[] = "loc.term = ".praxe_record::getData('term');
+		$where[] = "loc.studyfield = ".praxe_record::getData('studyfield');
+		if(praxe_record::getData('isced') > 0) {
+			$where[] = "loc.isced = ".praxe_record::getData('isced');
+		}
+	}else {
+		if($isced > 0) {
+			$where[] = "isced = ".(int)$isced;
+		}
+		if(!is_null($studyfield)) {
+			$where[] = "studyfield = ".(int)$studyfield;
+		}
+		if(!is_null($active)) {
+			$where[] = ($active) ? 'active = 1' : 'active = 0';
+		}
 	}
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
