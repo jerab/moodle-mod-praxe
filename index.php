@@ -91,9 +91,8 @@ foreach ($praxes as $praxe) {
     								LEFT JOIN {$CFG->prefix}groups g on(groupid = g.id) 
     								WHERE groupingid = $praxe->groupingid");
     	$aPart = array();
-    	foreach($groups as $group) {
-    		$participants = get_group_students($group->id);
-    		$aPart[] = '<a href="'.$CFG->wwwroot.'/user/index.php?id='.$course->id.'&amp;group='.$group->id.'">'.$group->name.'('.count($participants).')</a>';
+    	foreach($groups as $group) {    		    		
+    		$aPart[] = '<a href="'.$CFG->wwwroot.'/user/index.php?id='.$course->id.'&amp;group='.$group->id.'">'.$group->name.'</a>';
     	}
     	$part = implode(', ',$aPart);    	
     }
