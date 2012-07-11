@@ -1,8 +1,9 @@
 <?PHP
-$string['2ndlevelofeducation'] = 'Nižší sekundární vzdělávání (ISCED 2)';
-$string['3rdlevelofeducation'] = 'Vyšší sekundární vzdělávání (ISCED 3)';
+$string['levelofeducation-2nd'] = 'Nižší sekundární vzdělávání (ISCED 2)';
+$string['levelofeducation-3rd'] = 'Vyšší sekundární vzdělávání (ISCED 3)';
 $string['active_records'] = 'Aktivní záznamy';
 $string['active'] = 'Aktivní';
+$string['action_canceled'] = 'Akce byla zrušena.';
 $string['actual'] = 'Aktuální';
 $string['actual_practices'] = 'Aktuální praxe';
 $string['actual_status'] = 'Aktuální stav';
@@ -15,8 +16,8 @@ $string['assigned_to_inspection'] = 'Přiřazen k rozvrhu na hospitaci';
 $string['assigned_to_location'] = 'Přiřazen k dané nabídce';
 $string['assignteachers'] = 'Přiřadit učitele ke škole';
 $string['assigntolocation_mail'] = 'Dobrý den,'.
-									"\n".'dovolte nám oznámit Vám, že student $a->name si vybral předmět $a->subject na Vaší škole $a->school ke konání své praxe ze svého studijního předmětu $a->studyfield.'.
-									"\n".'Tato praxe by měla probíhat v období $a->date.'.
+									"\n".'dovolte nám oznámit Vám, že student {$a->name} si vybral předmět {$a->subject} na Vaší škole {$a->school} ke konání své praxe ze svého studijního předmětu {$a->studyfield}.'.
+									"\n".'Tato praxe by měla probíhat v období {$a->date}.'.
 									"\n".'Potvrďte, prosím, jeho přijetí na Vaší školu v prostředí Moodle (viz odkaz níže). Pokud z nějakého důvodu nemůžete přijmout studenta na tuto praxi, učiňte tak pomocí stejného odkazu níže.'.
 									"\n\n".'Mnohokrát děkujeme.'.
 									"\n\n".'S pozdravem'.
@@ -30,12 +31,12 @@ $string['city'] = 'Město';
 $string['configisceddescription'] = 'Stupeň vzdělávání podle ISCED';
 $string['confirmedlocation'] = 'Potvrzení přijetí na praxi';
 $string['confirmlocation_mail'] = 'Vážená studentko / studente,'.
-									"\n".'Vaše žádost o praxi v rámci studijního oboru $a->studyfield na škole $a->school u fakultního učitele $a->name byla přijata.'.									
-									"\n".'Nyní byste měl(a) v rámci činnosti $a->praxename vyplnit rozvrh Vaší výuky.'.
+									"\n".'Vaše žádost o praxi v rámci studijního oboru {$a->studyfield} na škole {$a->school} u fakultního učitele {$a->name} byla přijata.'.
+									"\n".'Nyní byste měl(a) v rámci činnosti {$a->praxename} vyplnit rozvrh Vaší výuky.'.
 									"\n\n".'S pozdravem'.
 									"\n".'Váš Moodle';
 $string['confirmschedule_mail'] = 'Vážený uživateli,'.
-									"\n".'Student $a->name provedl změny ve svém rozvrhu praxe na fakultní škole $a->school.'.									
+									"\n".'Student {$a->name} provedl změny ve svém rozvrhu praxe na fakultní škole {$a->school}.'.
 									"\n\n".'S pozdravem'.
 									"\n".'Váš Moodle';
 $string['confirmschedule_mailsubject'] = 'Změny v rozvrhu praxe';
@@ -91,6 +92,7 @@ $string['noschoolsavailable'] = 'Žádná škola k dispozici';
 $string['noselection'] = 'Bez výběru';
 $string['notallowedaction'] = 'Pro tuto činnost nemáte oprávnění';
 $string['numberofrecords'] = 'Počet záznamů';
+$string['only_actual'] = 'Aktuální';
 $string['phone'] = 'Telefon';
 $string['please_confirm_record'] = 'Prosím, potvrďte studentovu žádost o konání praxe u Vás.';
 $string['praxe'] = 'Praxe';
@@ -115,7 +117,7 @@ $string['praxe:editanyschool'] = 'Upravit jakoukoliv školu';
 $string['praxe:editownlocation'] = 'Upravit svou nabídku školy';
 $string['praxe:editownrecord'] = 'Upravit svou praxi';
 $string['praxe:editownschool'] = 'Upravit svou školu';
-$string['praxe:editstudentschedule'] = 'Upravit studentův rozvrh'; 	
+$string['praxe:editstudentschedule'] = 'Upravit studentův rozvrh';
 $string['praxe:manageallincourse'] = 'Přístup ke všem úpravám v rámci modulu';
 $string['praxe:viewanyrecorddetail'] = 'Zobrazit detaily praxí';
 $string['praxe:viewownschools'] = 'Zobrazit své školy';

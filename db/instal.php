@@ -44,11 +44,33 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
-function xmldb_praxe_upgrade($oldversion) {
-    global $DB;    
-    $dbman = $DB->get_manager();
-
+function xmldb_praxe_install() {
+    //global $CFG;
     return true;
 }
 
+function xmldb_praxe_install_recovery() {
+    //global $CFG;
+    return false;
+}
+/**
+ * Execute post-install custom actions for the module
+ * This function was added in 1.9
+ *
+ * @return boolean true if success, false on error
+ */
+function xmldb_praxe_install() {
+    return true;
+}
+
+
+/**
+ * Execute post-uninstall custom actions for the module
+ * This function was added in 1.9
+ *
+ * @return boolean true if success, false on error
+ */
+function xmldb_praxe_uninstall() {
+    return true;
+}
 ?>

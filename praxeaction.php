@@ -1,28 +1,25 @@
 <?php
 $cancel = optional_param('cancelbutton',null,PARAM_ALPHA);
 $confirm = optional_param('confirmsubmitbutton',null,PARAM_ALPHA);
-
 if(!is_null($cancel)) {
-	redirect(praxe_get_base_url());	
+	redirect(praxe_get_base_url());
 }
 $echo = '<div class="center">';
 switch($praxeaction) {
 	case 'deleteschedule':
-		
-		$scheduleid = optional_param('scheduleid',null,PARAM_INT);		
-		$schedule = get_record('praxe_schedules','id',$scheduleid);		
-		
+		$scheduleid = optional_param('scheduleid',null,PARAM_INT);
+		$schedule = $DB->get_record('praxe_schedules', array('id' => $scheduleid));
 		if(!$schedule) {
-			error(get_string('notallowedaction','praxe'));
+			print_error('notallowedaction', 'praxe');
 		}
-		$editable = (praxe_has_capability('editstudentschedule') && get_record('praxe_records','id',$schedule->record,'student',$USER->id))
+		$editable = (praxe_has_capability('editstudentschedule') && $DB->get_record('praxe_records', array('id' => $schedule->record, 'student' => $USER->id)))
 					|| praxe_has_capability('manageallincourse');
 		if(!$editable) {
-			error(get_string('notallowedaction','praxe'));
+			print_error('notallowedaction', 'praxe');
 		}
 		if(is_null($confirm)) {
 			$echo .= '<div class="before_form">'.get_string('realy_delete_schedule','praxe').'</div>';
-			$table = new stdClass();			 
+			$table = new stdClass();
 			$yc = $schedule->yearclass;
 			if($schedule->yearclass >= 6 && $schedule->yearclass <= 9) {
 				$yc = PRAXE_ISCED_2_TEXT." $yc.";
@@ -42,9 +39,9 @@ switch($praxeaction) {
 									date('G:i',(int)$schedule->timestart)." - ".date('G:i',(int)$schedule->timeend),
 									$yc,
 									s($schedule->schoolroom),
-									s($schedule->lessubject)							
+									s($schedule->lessubject)
 								);
-			$echo .= print_table($table,true);
+			$echo .= html_writer::table($table,true);
 			$f = '<form method="post" class="confirmform"><input type="hidden" name="scheduleid" value="'.$schedule->id.'">';
 			$f .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
 			$f .= '<div class="fitem center" style="margin: 10px 0;">';
@@ -52,45 +49,40 @@ switch($praxeaction) {
 			$f .= ' <input type="submit" name="cancelbutton" value="'.get_string('cancel').'" />';
 			$f .= '</div>';
 			$f .= '</form>';
-			$echo .= $f;			
+			$echo .= $f;
 		}else {
 			require_sesskey();
 			$post = (object) array('id'=>$scheduleid, 'deleted'=>1);
-			update_record('praxe_schedules',$post);
+			$DB->update_record('praxe_schedules',$post);
 			redirect(praxe_get_base_url());
 		}
-		
 		break;
 	case 'confirmschedule':
 		require_sesskey();
 		$teachermail = optional_param('mailtoextteacher', 0, PARAM_INT);
 		$praxe = praxe_record::getData();
-		$schedules = get_records('praxe_schedules','record',$praxe->rec_id);		
+		$schedules = $DB->get_records('praxe_schedules', array('record' => $praxe->rec_id));
 		if(empty($schedules)) {
-			error(get_string('notallowedaction','praxe'));
+			print_error('notallowedaction', 'praxe');
 		}
-			
 		$post = (object) array('id'=>$praxe->rec_id,'status'=>PRAXE_STATUS_SCHEDULE_DONE);
-		if(update_record('praxe_records',$post) && $teachermail == 1) {			
+		if($DB->update_record('praxe_records',$post) && $teachermail == 1) {
 			$emfrom = get_user_info_from_db('id',$praxe->rec_student);
 			require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 			$mail = new praxe_mailing();
 			$fak = new stdClass();
-			$fak->name = fullname($emfrom);			
-			$fak->school = s($praxe->location->name);		
-			$mail->setSubject(get_string('confirmschedule_mailsubject','praxe'));						
+			$fak->name = fullname($emfrom);
+			$fak->school = s($praxe->location->name);
+			$mail->setSubject(get_string('confirmschedule_mailsubject','praxe'));
 			$emtext = get_string('confirmschedule_mail','praxe',$fak);
 			$mail->setPlain($emtext);
-			$mail->setHtml($emtext);			
+			$mail->setHtml($emtext);
 			$emuser = get_user_info_from_db('id',$praxe->location->teacherid);
-			$mail->mailToUser($emuser, $emfrom);			
+			$mail->mailToUser($emuser, $emfrom);
 		};
-		
-		redirect(praxe_get_base_url());			
-		
-		break;	
+		redirect(praxe_get_base_url());
+		break;
 }
 $echo .= "</div>";
 echo $echo;// . praxe_praxehome_buttons();
-
 //echo $pacon;

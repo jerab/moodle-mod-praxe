@@ -1,14 +1,21 @@
-<?php 
+<?php
 /**
- * Code fragment to define the version of praxe
- * This fragment is called by moodle_needs_upgrading() and /admin/index.php
+ * Defines the version of newmodule
  *
- * @author  Your Name <your@email.address>
- * @version $Id: version.php,v 1.5.2.2 2009/03/19 12:23:11 jerab Exp $
- * @package mod/praxe
+ * This code fragment is called by moodle_needs_upgrading() and
+ * /admin/index.php
+ *
+ * @package    mod
+ * @subpackage praxe
+ * @copyright  2012 Tomas Jerabek <t.jerab@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$module->version  = 2010052020;  // The current module version (Date: YYYYMMDDXX)
-$module->cron     = 0;           // Period for cron to check this module (secs)
+defined('MOODLE_INTERNAL') || die();
+
+$module->version   = 2012063001;      // The current module version (Date: YYYYMMDDXX)
+$module->requires  = 2011120503;      // Requires this Moodle version
+$module->cron      = 0;               // Period for cron to check this module (secs)
+$module->component = 'mod_praxe';         // To check on upgrade, that module sits in correct place
 
 ?>

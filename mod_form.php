@@ -42,57 +42,51 @@ class mod_praxe_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-		
         $mform->addElement('textarea', 'description', get_string('description'), array('rows'=>'5', 'cols'=>'48'));
         $mform->setType('description', PARAM_TEXT);
         $mform->addRule('description', null, 'required', null, 'client');
         $mform->addRule('description', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
     /*
     /// Adding the required "intro" field to hold the description of the instance
-        $mform->addElement('htmleditor', 'intro', get_string('praxeintro', 'praxe'));
+        $mform->addElement('editor', 'intro', get_string('praxeintro', 'praxe'));
         $mform->setType('intro', PARAM_RAW);
         $mform->addRule('intro', get_string('required'), 'required', null, 'client');
-        $mform->setHelpButton('intro', array('writing', 'richtext'), false, 'editorhelpbutton');
+        $mform->addHelpButton('intro', 'writing', null, false);
 
     /// Adding "introformat" field
         $mform->addElement('format', 'introformat', get_string('format'));
 	*/
 //-------------------------------------------------------------------------------
-    /// Adding the rest of praxe settings, spreeading all them into this fieldset    
+    /// Adding the rest of praxe settings, spreeading all them into this fieldset
         //$mform->addElement('static', 'label1', 'praxesetting1', 'Your praxe fields go here. Replace me! - mod_form.php');
         $mform->addElement('header', 'praxefieldset', get_string('praxefieldset', 'praxe'));
-        
 	///	Adding the "study field" select field to choose subject of current course
         if($options = $this->getStudyFields()) {
 			$mform->addElement('select', 'studyfield', get_string('studyfield', 'praxe'), $options);
-			$mform->addRule('studyfield', null, 'required', null, 'client');			
+			$mform->addRule('studyfield', null, 'required', null, 'client');
 		}
-	
-	///	Adding the "isced" select field to choose the isced level for current course		
+	///	Adding the "isced" select field to choose the isced level for current course
 		$options = array(	PRAXE_ISCED_0 => PRAXE_ISCED_0_TEXT,
 							PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
 							PRAXE_ISCED_3 => PRAXE_ISCED_3_TEXT);
 		$mform->addElement('select', 'isced', get_string('iscedlevel', 'praxe'), $options);
 		$mform->addRule('isced', null, 'required', null, 'client');
-		
-	///	Adding the "year" select field to choose the calendar year for current course		
+	///	Adding the "year" select field to choose the calendar year for current course
 		$actualyear = (int)date('Y',mktime());
 		$options = array(	$actualyear => $actualyear,
 							($actualyear+1) => ($actualyear+1),
 							($actualyear+2) => ($actualyear+2));
 		$mform->addElement('select', 'year', get_string('year', 'praxe'), $options);
 		$mform->addRule('year', null, 'required', null, 'client');
-		
-	///	Adding the "term" select field to choose the summer term/winter term for current course		
+	///	Adding the "term" select field to choose the summer term/winter term for current course
 		$options = array(	PRAXE_TERM_WS => PRAXE_TERM_WS_TEXT,
 							PRAXE_TERM_SS => PRAXE_TERM_SS_TEXT);
 		$mform->addElement('select', 'term', get_string('term', 'praxe'), $options);
 		$mform->addRule('term', null, 'required', null, 'client');
-		
 		$mform->addElement('date_selector', 'datestart', get_string('praxe_start','praxe'));
 		$mform->addElement('date_selector', 'dateend', get_string('praxe_end','praxe'));
 		$mform->addRule('datestart', null, 'required', null, 'client');
-		$mform->addRule('dateend', null, 'required', null, 'client');                
+		$mform->addRule('dateend', null, 'required', null, 'client');
 //-------------------------------------------------------------------------------
         // add standard elements, common to all modules
         $features = new stdClass;
@@ -101,24 +95,23 @@ class mod_praxe_mod_form extends moodleform_mod {
         $features->groupmembersonly = true;
         $features->gradecat = false;
         $features->idnumber = false;
-        $this->standard_coursemodule_elements($features);        
+        $this->standard_coursemodule_elements($features);
 //-------------------------------------------------------------------------------
         // add standard buttons, common to all modules
         $this->add_action_buttons();
 
     }
-    
     public function getStudyFields() {
-	    if($praxe_subjects = get_records('praxe_studyfields', '', '', 'shortcut')) {                      
+	    global $DB;
+        if($praxe_subjects = $DB->get_records('praxe_studyfields', null, 'shortcut')) {
 			$options = array();
 		    foreach ($praxe_subjects as $subj) {
-		    	$options[$subj->id] = $subj->shortcut;//." - ".get_string($subj->name, 'praxe');		    	
+		    	$options[$subj->id] = $subj->shortcut;
 		    }
-		    return $options;		    
+		    return $options;
 		}
 		return false;
-		    	
-    }    
+    }
 }
 
 ?>

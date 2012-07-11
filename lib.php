@@ -1,16 +1,4 @@
 <?php
-define('PRAXE_ISCED_0',0);
-define('PRAXE_ISCED_2',2);
-define('PRAXE_ISCED_3',3);
-define('PRAXE_ISCED_0_TEXT',get_string('all'));
-define('PRAXE_ISCED_2_TEXT',get_string('2ndlevelofeducation','praxe'));
-define('PRAXE_ISCED_3_TEXT',get_string('3rdlevelofeducation','praxe'));
-
-define('PRAXE_TERM_WS',1);
-define('PRAXE_TERM_SS',2);
-define('PRAXE_TERM_WS_TEXT',get_string('winterterm','praxe'));
-define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
-
 /**
  * Library of functions and constants for module newmodule
  * This file should have two well differenced parts:
@@ -26,8 +14,18 @@ define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
  *     actions across all modules.
  */
 
-/// (replace newmodule with the name of your module and delete this line)
-//$praxe_EXAMPLE_CONSTANT = 42;     /// for example
+define('PRAXE_ISCED_0',0);
+define('PRAXE_ISCED_2',2);
+define('PRAXE_ISCED_3',3);
+define('PRAXE_ISCED_0_TEXT',get_string('all'));
+define('PRAXE_ISCED_2_TEXT',get_string('levelofeducation-2nd','praxe'));
+define('PRAXE_ISCED_3_TEXT',get_string('levelofeducation-3rd','praxe'));
+
+define('PRAXE_TERM_WS',1);
+define('PRAXE_TERM_SS',2);
+define('PRAXE_TERM_WS_TEXT',get_string('winterterm','praxe'));
+define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
+
 
 /**
  * Given an object containing all the necessary data,
@@ -39,7 +37,7 @@ define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
  * @return int The id of the newly inserted newmodule record
  */
 function praxe_add_instance($praxe) {
-
+    global $DB;
 	/// if exists any instance of the same ISCED,STUDY FIELD in this course returns id of that instance
     /*
 	if( ($idPraxe = praxe_get_instance($praxe->course)) !== false ) {
@@ -48,10 +46,9 @@ function praxe_add_instance($praxe) {
     */
 	$praxe->timecreated = time();
     //$praxe->studyfield = '';
-    //$praxe->isced = '';	
-    # You may have to add extra stuff in here #
+    //$praxe->isced = '';
 
-    return insert_record('praxe', $praxe);
+    return $DB->insert_record('praxe', $praxe);
 }
 
 
@@ -64,13 +61,12 @@ function praxe_add_instance($praxe) {
  * @return boolean Success/Fail
  */
 function praxe_update_instance($praxe) {
+    global $DB;
 
     $praxe->timemodified = time();
     $praxe->id = $praxe->instance;
 
-    # You may have to add extra stuff in here #
-
-    return update_record('praxe', $praxe);
+    return $DB->update_record('praxe', $praxe);
 }
 
 
@@ -83,20 +79,17 @@ function praxe_update_instance($praxe) {
  * @return boolean Success/Failure
  */
 function praxe_delete_instance($id) {
+    global $DB;
 
-    if (! $praxe = get_record('praxe', 'id', $id)) {
+    if (! $praxe = $DB->get_record('praxe', array('id' => $id))) {
         return false;
     }
 
-    $result = true;
-
-    # Delete any dependent records here #
-
-    if (! delete_records('praxe', 'id', $praxe->id)) {
-        $result = false;
+    if (! $DB->delete_records('praxe', array('id' => $praxe->id))) {
+        return false;
     }
 
-    return $result;
+    return true;
 }
 
 
@@ -111,7 +104,7 @@ function praxe_delete_instance($id) {
  * @todo Finish documenting this function
  */
 function praxe_user_outline($course, $user, $mod, $praxe) {
-    return $return;
+    return null;
 }
 
 
@@ -148,7 +141,7 @@ function praxe_print_recent_activity($course, $isteacher, $timestart) {
  * @return boolean
  * @todo Finish documenting this function
  **/
-function praxe_cron () {
+function praxe_cron() {
     return true;
 }
 
@@ -179,15 +172,7 @@ function praxe_get_participants($praxeid) {
  * @todo Finish documenting this function
  */
 function praxe_scale_used($praxeid, $scaleid) {
-    $return = false;
-
-    //$rec = get_record("praxe","id","$praxeid","scale","-$scaleid");
-    //
-    //if (!empty($rec) && !empty($scaleid)) {
-    //    $return = true;
-    //}
-
-    return $return;
+    return false;
 }
 
 
@@ -200,33 +185,13 @@ function praxe_scale_used($praxeid, $scaleid) {
  * @return boolean True if the scale is used by any praxe
  */
 function praxe_scale_used_anywhere($scaleid) {
-    if ($scaleid and record_exists('praxe', 'grade', -$scaleid)) {
+    /*global $DB;
+    if ($scaleid and $DB->record_exists('praxe', array('grade' => -$scaleid))) {
         return true;
     } else {
         return false;
-    }
-}
-
-
-/**
- * Execute post-install custom actions for the module
- * This function was added in 1.9
- *
- * @return boolean true if success, false on error
- */
-function praxe_install() {
-    return true;
-}
-
-
-/**
- * Execute post-uninstall custom actions for the module
- * This function was added in 1.9
- *
- * @return boolean true if success, false on error
- */
-function praxe_uninstall() {
-    return true;
+    }*/
+    return false;
 }
 
 
@@ -239,17 +204,18 @@ function praxe_uninstall() {
 
 /**
  * Check if exists any instance of praxe and return its id or return false. This function is also called in lib.php.
- * 
- * @param $course int - course id 
+ *
+ * @param $course int - course id
  * @param $isced int - isced level
  * @param $studyfield int - study field id which is generated in praxe_studyfield table and included in praxe table
- * @return id (int) of existing instance, otherwise false 
+ * @return id (int) of existing instance, otherwise false
  */
-function praxe_get_instance($course, $isced='', $studyfield='') {	
-	$isced_f = ($isced == '')? '' : 'isced';
+function praxe_get_instance($course, $isced='', $studyfield='') {
+	global $DB;
+
+    $isced_f = ($isced == '')? '' : 'isced';
 	$studyfield_f = ($studyfield == '')? '' : 'studyfield';
-	
-	if( $inst = get_record('praxe', 'course', $course, $isced_f, $isced, $studyfield_f, $studyfield)) {                      
+	if( $inst = $DB->get_record('praxe', array('course' => $course, $isced_f => $isced, $studyfield_f => $studyfield))) {
 			return $inst->id;
 	}
 
