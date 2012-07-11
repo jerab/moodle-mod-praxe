@@ -1,8 +1,23 @@
 <?php
-$string['2ndlevelofeducation'] = 'Lower secondary or second stage of basic education';
-$string['3rdlevelofeducation'] = '(Upper) secondary education';
+/**
+ * Defines the version of newmodule
+ *
+ * This code fragment is called by moodle_needs_upgrading() and
+ * /admin/index.php
+ *
+ * @package    mod
+ * @subpackage praxe
+ * @copyright  2012 Tomas Jerabek <t.jerab@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+$string['levelofeducation-2nd'] = 'Lower secondary or second stage of basic education';
+$string['levelofeducation-3rd'] = '(Upper) secondary education';
 $string['active_records'] = 'Active records';
 $string['active'] = 'Active';
+$string['action_canceled'] = 'Action has been canceled.';
 $string['actual'] = 'Actual';
 $string['actual_practices'] = 'Actual practices';
 $string['actual_status'] = 'Actual status';
@@ -13,8 +28,8 @@ $string['addtoschedule'] = 'Add item to schedule';
 $string['already_used'] = 'Already used';
 $string['assignteachers'] = 'Assign teachers to school';
 $string['assigntolocation_mail'] = 'Dear Sir or Madam,'.
-									"\n".'our pleasure to inform you that the student $a->name has choosen your subject $a->subject at your school $a->school to conduct his/her practice from the course of study $a->studyfield.'.
-									"\n".'This practice should take place between $a->date.'.
+									"\n".'our pleasure to inform you that the student {$a->name} has choosen your subject {$a->subject} at your school {$a->school} to conduct his/her practice from the course of study {$a->studyfield}.'.
+									"\n".'This practice should take place between {$a->date}.'.
 									"\n".'Please confirm your acceptance of the student&apos;s practice in Moodle (see link below). If for some reason you can not accept the student for this practice, please do so using the same link below.'.
 									"\n\n".'Thank you very much.'.
 									"\n\n".'Sincerely,'.
@@ -31,12 +46,12 @@ $string['city'] = 'City';
 $string['configisceddescription'] = 'International Standard Classification of Education (ISCED)';
 $string['confirmedlocation'] = 'Your practice confirmed';
 $string['confirmlocation_mail'] = 'Dear student,'.
-									"\n".'you have been enroled for the practice from $a->studyfield at the school $a->school. Your mentor should be $a->name.'.									
-									"\n".'You should now fill in the lesson schedule form in the activity $a->praxename.'.
+									"\n".'you have been enroled for the practice from {$a->studyfield} at the school {$a->school}. Your mentor should be {$a->name}.'.
+									"\n".'You should now fill in the lesson schedule form in the activity {$a->praxename}.'.
 									"\n\n".'Yours sincerely'.
 									"\n".'Moodle';
 $string['confirmschedule_mail'] = 'Dear user,'.
-									"\n".'The student $a->name has changed some parts of his schedule of the practice at the school $a->school.'.									
+									"\n".'The student {$a->name} has changed some parts of his schedule of the practice at the school {$a->school}.'.
 									"\n\n".'Yours sincerely'.
 									"\n".'Moodle';
 $string['confirmschedule_mailsubject'] = 'Changes in the schedule';
@@ -56,6 +71,7 @@ $string['extteacher'] = 'External teacher';
 $string['filter'] = 'Filter';
 $string['gotoinspection'] = 'Go to inspection';
 $string['headmaster'] = 'Headmaster';
+$string['inprocess'] = 'In process';
 $string['inspection'] = 'Teacher visit';
 $string['iscedlevel'] = 'ISCED level';
 $string['lesson'] = 'lesson';
@@ -70,7 +86,7 @@ $string['location_updated'] = 'The location has been updated';
 $string['locationisrequired'] = 'Location is required';
 $string['locations'] = 'Locations';
 $string['mailnotsenttoexternalteacher'] = 'E-mail has not been sent to external teacher';
-$string['modulename'] = 'Praxe';
+$string['modulename'] = 'praxe';
 $string['modulenameplural'] = 'Praxes';
 $string['my_locations'] = 'My locations';
 $string['my_praxe'] = 'My practice';
@@ -90,8 +106,11 @@ $string['noschoolsavailable'] = 'No schools available';
 $string['noselection'] = 'Without selection';
 $string['notallowedaction'] = 'Not allowed action';
 $string['numberofrecords'] = 'Number of records';
+$string['only_actual'] = 'Actual';
 $string['phone'] = 'Phone';
 $string['please_confirm_record'] = 'Please, confirm the student&apos;s request to practise at your location.';
+$string['pluginadministration'] = 'praxe administration';
+$string['pluginname'] = 'praxe';
 $string['praxe'] = 'Praxe';
 $string['praxe_completed'] = 'Practice completed';
 $string['praxe_end'] = 'Practice end';
@@ -102,8 +121,8 @@ $string['praxe:addstudentschedule'] = 'Add student&apos;s schedule';
 $string['praxe:assignselftoinspection'] = 'Assign self to schedule as an inspector';
 $string['praxe:assignteachertoanyschool'] = 'Assign teacher user to any school';
 $string['praxe:assignteachertoownschool'] = 'Assing teacher user to own school';
-$string['praxe:beexternalteacher'] = 'Allow user to be assigned to the school as a headmaster';
-$string['praxe:beheadmaster'] = 'Allow user to be assigned to the school as an external teacher';
+$string['praxe:beexternalteacher'] = 'Allow user to be assigned to the school as an external teacher';
+$string['praxe:beheadmaster'] = 'Allow user to be assigned to the school as a headmaster';
 $string['praxe:confirmlocation'] = 'Confirm student assigning to the location';
 $string['praxe:confirmownlocation'] = 'Confirm student assigning to the user(external teacher) location';
 $string['praxe:createownlocation'] = 'Create own location';
@@ -122,7 +141,8 @@ $string['praxe:viewrecordstoanylocation'] = 'View all practice records assigned 
 $string['praxe:viewrecordstoownlocation'] = 'View practice records assigned to own location';
 $string['praxefieldset'] = 'Specific praxe settings';
 $string['praxeintro'] = 'Intro praxe';
-$string['praxename'] = 'Praxe name';
+$string['praxename'] = 'Praxe';
+$string['praxename_help'] = 'Praxe help';
 $string['realy_delete_schedule'] = 'You are going to delete the item of schedule below';
 $string['records_list'] = 'List of practices';
 $string['refuse'] = 'Refuse';
@@ -146,9 +166,10 @@ $string['status_schedule_done_text'] = 'The schedule has been created.';
 $string['status_evaluated_text'] = 'The practice has been evaluated.';
 $string['status_finished_text'] = 'The practice is completed.';
 $string['status_refused_text'] = 'The selection has been refused.';
+$string['status_refused_text_for_student'] = 'Your last selection has been refused.';
 $string['street'] = 'Street';
-$string['strftimedayshort'] = '%%D';
-$string['strftimeday'] = '%%A';
+$string['strftimedayshort'] = '%D';
+$string['strftimeday'] = '%A';
 $string['student'] = 'Student';
 $string['studenttopraxe'] = 'Student to practice';
 $string['studyfield'] = 'Study field';

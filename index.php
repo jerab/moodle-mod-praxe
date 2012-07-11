@@ -15,97 +15,79 @@ require_once(dirname(__FILE__).'/locallib.php');
 
 $id = required_param('id', PARAM_INT);   // course
 
-if (! $course = get_record('course', 'id', $id)) {
-    error('Course ID is incorrect');
-}
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 
 require_course_login($course);
 
 add_to_log($course->id, 'praxe', 'view all', "index.php?id=$course->id", '');
 
+$coursecontext = context_course::instance($course->id);
 
-/// Get all required stringspraxe
+$PAGE->set_url('/mod/praxe/index.php', array('id' => $id));
+$PAGE->set_title(format_string($course->fullname));
+$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_context($coursecontext);
+if ($cm = get_coursemodule_from_id('praxe', $id)) {
+    $PAGE->set_headingmenu(navmenu($course, $cm));
+}
 
-$strpraxes = get_string('modulenameplural', 'praxe');
-$strpraxe  = get_string('modulename', 'praxe');
 
-
-/// Print the header
-
-$navlinks = array();
-$navlinks[] = array('name' => $strpraxes, 'link' => '', 'type' => 'activity');
-$navigation = build_navigation($navlinks);
-
-print_header_simple($strpraxes, '', $navigation, '', '', true, '', navmenu($course));
-
-/// Get all the appropriate data
-
+echo $OUTPUT->header();
 if (! $praxes = get_all_instances_in_course('praxe', $course)) {
-    notice('There are no instances of praxe', "../../course/view.php?id=$course->id");
-    die;
+    notice(get_string('nopraxes', 'praxe'), new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
 /// Print the list of instances (your module will probably extend this)
-
 $timenow  = time();
-$strname  = get_string('name');
-$strweek  = get_string('week');
-$strdesc = get_string('description');
-$strisced = get_string('iscedlevel', 'praxe');
-$stryear = get_string('year', 'praxe');
-$strterm = get_string('term', 'praxe');
-$strdate = get_string('dateofpraxe', 'praxe');
-$strnumofrec = get_string('numberofrecords', 'praxe');
-$strpart = get_string('participants')." (".get_string('groups').")";
+$table = new html_table();
+$table->head  = array (get_string('name'),
+                        get_string('description'),
+                        get_string('iscedlevel', 'praxe'),
+                        get_string('year', 'praxe'),
+                        get_string('term', 'praxe'),
+                        get_string('dateofpraxe', 'praxe'),
+                        get_string('numberofrecords', 'praxe'),
+                        get_string('participants')." (".get_string('groups').")"
+                        );
+$table->align = array ('center', 'left', 'center', 'center', 'center', 'center', 'center', 'center');
 
-/*if ($course->format == 'weeks') {
-    $table->head  = array ($strweek, $strname);
-    $table->align = array ('center', 'left');
-    
-} else if ($course->format == 'topics') {*/
-    $table->head  = array ($strname, $strdesc, $strisced, $stryear, $strterm, $strdate, $strnumofrec, $strpart);
-    $table->align = array ('center', 'left', 'center', 'center', 'center', 'center', 'center', 'center');
-/*} else {
-   	$table->head  = array ($strname);
-    $table->align = array ('left', 'left', 'left');	
-}*/   
 foreach ($praxes as $praxe) {
-	if(! $records = get_records('praxe_records','praxe',$praxe->id)) {
-		$numofrecords = 0;
-	}else {
-		$numofrecords = count($records);
-	}    
-	if (!$praxe->visible) {
-        //Show dimmed if the mod is hidden
-        $link = '<a class="dimmed" href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';        
+    $records = $DB->get_records('praxe_records', array('praxe' => $praxe->id));
+    $numofrecords = count($records);
+
+    if (!$praxe->visible) {
+        $link = html_writer::link(
+            new moodle_url('/mod/praxe/view.php', array('id' => $praxe->coursemodule)),
+            format_string($praxe->name, true),
+            array('class' => 'dimmed'));
     } else {
-        //Show normal if the mod is visible
-        $link = '<a href="view.php?id='.$praxe->coursemodule.'">'.format_string($praxe->name).'</a>';        
+        $link = html_writer::link(
+            new moodle_url('/mod/praxe/view.php', array('id' => $praxe->coursemodule)),
+            format_string($praxe->name, true));
     }
-    $isced = praxe_get_isced_text($praxe->isced);    
-    
     $part = '0';
-    if(!empty($praxe->groupingid)) {    	
-    	$groups = get_records_sql("SELECT g.* 
-    								FROM {$CFG->prefix}groupings_groups gg 
-    								LEFT JOIN {$CFG->prefix}groups g on(groupid = g.id) 
-    								WHERE groupingid = $praxe->groupingid");
-    	$aPart = array();
-    	foreach($groups as $group) {    		    		
+    if(!empty($praxe->groupingid)) {
+        $groups = $DB->get_records_sql("SELECT g.*
+    									FROM {groupings_groups} gg
+    									LEFT JOIN {groups} g on(groupid = g.id)
+    									WHERE groupingid = $praxe->groupingid");
+        $aPart = array();
+    	foreach($groups as $group) {
     		$aPart[] = '<a href="'.$CFG->wwwroot.'/user/index.php?id='.$course->id.'&amp;group='.$group->id.'">'.$group->name.'</a>';
     	}
-    	$part = implode(', ',$aPart);    	
+    	$part = implode(', ',$aPart);
     }
-    
     $date = userdate($praxe->datestart, get_string('strftimedateshort'))." - ".userdate($praxe->dateend, get_string('strftimedateshort'));
-    $table->data[] = array ($link, s($praxe->description), $isced, s($praxe->year), praxe_get_term_text($praxe->term), $date, $numofrecords, $part);
+    $table->data[] = array ($link, s($praxe->description), praxe_get_isced_text($praxe->isced), s($praxe->year), praxe_get_term_text($praxe->term), $date, $numofrecords, $part);
+    /*
+    if ($course->format == 'weeks' or $course->format == 'topics') {
+        $table->data[] = array($praxe->section, $link);
+    } else {
+        $table->data[] = array($link);
+    }*/
 }
 
-print_heading($strpraxes);
-print_table($table);
-
-/// Finish the page
-
-print_footer($course);
-
+echo $OUTPUT->heading(get_string('modulenameplural', 'praxe'), 2);
+echo html_writer::table($table);
+echo $OUTPUT->footer();
 ?>
