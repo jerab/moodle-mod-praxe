@@ -233,6 +233,7 @@ class praxe_view_extteacher extends praxe_view {
 		$cellf->attributes['class'] = "header first";
 		$cellf->header = true;
 		$paramsToAssing = array('post_form'=>'assigntoinspection', 'sesskey'=>sesskey(), 'submitbutton'=>'true', 'userid'=>$USER->id);
+		$paramsToRemAssing = array('post_form'=>'removefrominspection', 'sesskey'=>sesskey(), 'submitbutton'=>'true');
 		foreach($sched as $row) {
 		    $datetd = userdate($row['date'],get_string('strftimeday','praxe'))."<br />".userdate($row['date'],get_string('strftimedateshort'));
 			$cell = clone $cellf;
@@ -251,6 +252,13 @@ class praxe_view_extteacher extends praxe_view {
 						    $item .= "<div class=\"inspector right\">"
 							        .$OUTPUT->render(new pix_icon('icon_inspect',get_string('inspection','praxe'),'praxe'))
 							        ."&nbsp;".praxe_get_user_fullname($insp);
+						    /// remove assinging from item action ///
+							if($USER->id == $insp->id || praxe_has_capability('manageallincourse')) {
+							    $params = $paramsToRemAssing;
+							    $params['scheduleid'] = $row[$c]->id;
+							    $params['inspid'] = $insp->id;
+							    $item .= $OUTPUT->action_icon(praxe_get_base_url($params),new pix_icon('t/delete',get_string('removeinspection','praxe')));
+							}
 							$item .= "</div>";
 						}
 					}else if(praxe_has_capability('assignselftoinspection')) {

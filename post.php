@@ -223,10 +223,21 @@
 
 				$post->timecreated = time();
 				if($DB->insert_record('praxe_schedule_inspections', $post)){
-					redirect(praxe_get_base_url(array("mode"=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_HOME],"recordid"=>$sch->record)), get_string('assigned_to_inspection','praxe'));
+				    redirect(praxe_get_base_url(array("mode"=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_HOME],"recordid"=>$sch->record)), get_string('assigned_to_inspection','praxe'));
 				}
 
 				break;
+			case 'removefrominspection' :
+			    $post->schedule = required_param('scheduleid',PARAM_INT);
+				$post->inspector = required_param('inspid',PARAM_INT);
+				require_capability('mod/praxe:assignselftoinspection',$context,$post->inspector,false);
+				if(!$sch = praxe_get_schedule($post->schedule)) {
+			    	print_error('notallowedaction', 'praxe');
+				}
+				if($DB->delete_records('praxe_schedule_inspections', (array)$post)) {
+				    redirect(praxe_get_base_url(array("mode"=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_HOME],"recordid"=>$sch->record)), get_string('removed_from_inspection','praxe'));
+				}
+			    break;
 			case ('confirmlocation'): /// confirmation location by external teacher or teacher
 			    $recid = optional_param('recordid',0,PARAM_INT);
 				$record = praxe_get_record($recid);

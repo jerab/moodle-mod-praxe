@@ -130,6 +130,7 @@ $string['praxename'] = 'Název praxe';
 $string['realy_delete_schedule'] = 'Chystáte se smazat tento záznam v rozvrhu';
 $string['records_list'] = 'Seznam praxí';
 $string['refuse'] = 'Odmítnout';
+$string['removed_from_inspection'] = 'Učitel byl odvolán z hospitace';
 $string['schedule'] = 'Rozvrh';
 $string['schedule_item_added'] = 'Nový záznam přidán';
 $string['schedule_updated'] = 'Rozvrh upraven';

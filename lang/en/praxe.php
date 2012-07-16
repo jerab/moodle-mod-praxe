@@ -35,7 +35,7 @@ $string['assigntolocation_mail'] = 'Dear Sir or Madam,'.
 									"\n\n".'Sincerely,'.
 									"\n".'Organizers of educational practice';
 $string['assigntolocation_text_forstudents'] = 'Choose one of the available locations shown below.';
-$string['assigned_to_inspection'] = 'Assigned to student&apos;s schedule';
+$string['assigned_to_inspection'] = 'Assigned to an inspection';
 $string['assigned_to_location'] = 'Assigned to location';
 $string['available_location'] = 'Available_location';
 $string['changelocation'] = 'Change location';
@@ -146,6 +146,7 @@ $string['praxename_help'] = 'Praxe help';
 $string['realy_delete_schedule'] = 'You are going to delete the item of schedule below';
 $string['records_list'] = 'List of practices';
 $string['refuse'] = 'Refuse';
+$string['removed_from_inspection'] = 'User has been revoked from inspection';
 $string['schedule'] = 'Schedule';
 $string['schedule_item_added'] = 'New date has been added to the schedule';
 $string['schedule_updated'] = 'Schedule has been updated';
