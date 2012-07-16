@@ -6,8 +6,8 @@
 
     $praxe   = optional_param('praxe', praxe_record::getData('id'), PARAM_INT);
     $edit    = optional_param('edit', null, PARAM_ALPHA);
-    $cancel    = optional_param('cancel', null, PARAM_TEXT);
-    $submit    = optional_param('submitbutton', null, PARAM_TEXT);
+    $cancel  = optional_param('cancel', null, PARAM_TEXT);
+    $submit  = optional_param('submitbutton', null, PARAM_TEXT);
 
     /// praxe instance doesn't exist ///
     if(empty($praxe)){
@@ -49,15 +49,14 @@
             case ('assigntolocation'): /// assigning student to location
 				/// no access / no id of student to assign ///
 				if(has_capability('mod/praxe:editownrecord',$context)) {
-					$student = $USER->id;
+					$post->student = $USER->id;
 				}else if(has_capability('mod/praxe:editanyrecord',$context)) {
-					$student = optional_param('student', null, PARAM_INT);
+					$post->student = optional_param('student', 0, PARAM_INT);
 				}
-
-				if(!isset($student) || is_null($student)) {
+				if(!$post->student) {
 					print_error('notallowedaction', 'praxe');
 				}
-				$post->student = $student;
+
 				$post->praxe = $praxe;
 				/// check location data ///
 				if(is_null($post->location = optional_param('location', null, PARAM_INT)) ) {
@@ -74,17 +73,17 @@
 					}
 				}
 
-				$post->timecreated = mktime();
-				$post->timemodified = mktime();
+				$post->timecreated = time();
+				$post->timemodified = time();
 				$DB->delete_records('praxe_records', array('praxe' => $praxe, 'student' => $student));
 
 				$id = false;
 				$id = $DB->insert_record('praxe_records', $post);
-				if(is_numeric($id)) {
+				if($id) {
 					/// sending mail to external teacher ///
 					if(!is_null($location->teacherid)) {
-						$emuser = get_user_info_from_db('id',$location->teacherid);
-						$emfrom = get_user_info_from_db('id',$post->student);
+					    $emuser = get_complete_user_data('id',$location->teacherid);
+						$emfrom = get_complete_user_data('id',$post->student);
 						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 						$mail = new praxe_mailing();
 						$stud = new stdClass();
@@ -229,18 +228,17 @@
 
 				break;
 			case ('confirmlocation'): /// confirmation location by external teacher or teacher
-				$recid = optional_param('recordid',null,PARAM_INT);
+			    $recid = optional_param('recordid',0,PARAM_INT);
 				$record = praxe_get_record($recid);
-				$refuse = optional_param('submitrefuse',null);
-				$confirm = optional_param('submitconfirm',null);
+				$refuse = optional_param('submitrefuse',null,PARAM_TEXT);
+				$confirm = optional_param('submitconfirm',null,PARAM_TEXT);
 				if(!$record || !($refuse || $confirm)) {
 					print_error('notallowedaction', 'praxe');
 				}
 				if(!praxe_has_capability('confirmlocation') && !(praxe_has_capability('confirmownlocation') && $record->teacherid == $USER->id)) {
 					print_error('notallowedaction', 'praxe');
 				}
-
-				$post->id = $record->id;
+                $post->id = $record->id;
 				$msg = '';
 				if(!is_null($refuse)) {
 					$post->status = PRAXE_STATUS_REFUSED;
@@ -252,8 +250,8 @@
 
 				if($DB->update_record('praxe_records',$post) && false) {
 					if($post->status = PRAXE_STATUS_CONFIRMED) {
-						$emuser = get_user_info_from_db('id',$record->student);
-						$emfrom = get_user_info_from_db('id',$record->teacherid);
+						$emuser = get_complete_user_data('id',$record->student);
+						$emfrom = get_complete_user_data('id',$record->teacherid);
 						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 						$mail = new praxe_mailing();
 						$fak = new stdClass();
@@ -280,16 +278,15 @@
 				$post->lessubject = required_param('lessubject',PARAM_TEXT);
 				$post->lesnumber = optional_param('lesnumber',0,PARAM_INT);
 				$post->schoolroom = optional_param('schoolroom','',PARAM_TEXT);
-				$post->lestheme = optional_param('lestheme','');
-				print_object($mode);
+				$post->lestheme = optional_param('lestheme','',PARAM_CLEANHTML);
+				$post->lestheme = $post->lestheme['text'];
+				$timestart = required_param('timestart', PARAM_CLEAN);
+				$timeend = required_param('timeend', PARAM_CLEAN);
+				$post->timestart = mktime($timestart['hour'],$timestart['minute'], null, $timestart['month'],$timestart['day'],$timestart['year']);
+				$post->timeend = mktime($timeend['hour'],$timeend['minute'], null, $timeend['month'],$timeend['day'],$timeend['year']);
 
-				$tstart = required_param('timestart');
-				$tend = required_param('timeend');
-				$post->timestart = mktime($tstart['hour'],$tstart['minute'], null, $tstart['month'],$tstart['day'],$tstart['year']);
-				$post->timeend = mktime($tend['hour'],$tend['minute'], null, $tend['month'],$tend['day'],$tend['year']);
-				if($post->timestart > $post->timeend || $post->timestart < mktime()+60*60*24) {
-					$redurl = praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE]));
-					redirect($redurl, get_string('error_timeschedule','praxe'));
+				if($post->timestart > $post->timeend || $post->timestart < time()+60*60*24) {
+					redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_timeschedule','praxe'));
 				}
 				$post->record = praxe_record::getData('rec_id');
 
@@ -334,10 +331,13 @@
    	        case 'addlocation' :
     	        $params['mode'] = ($viewrole == 'EXTTEACHER') ? 'mylocations' : 'locations';
     	        $params['schoolid'] = optional_param('school',0,PARAM_INT);
+   	        /// student role ///
+    	    case 'makeschedule' :
+   	            $params['mode'] = 'schedule';
+   	            break;
     	    default :
     	        break;
     	}
-
     	foreach($_POST as $k=>$v) {
     		unset($_POST[$k]);
     	}

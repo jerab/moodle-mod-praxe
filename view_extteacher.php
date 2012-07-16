@@ -93,6 +93,7 @@ class praxe_view_extteacher extends praxe_view {
 		}
 		return $ret;
 	}
+
 	public function show_records($records = array()) {
 		global $USER, $mode;
 		/// no records set and this method is called from this class ///
@@ -102,7 +103,7 @@ class praxe_view_extteacher extends praxe_view {
 		if(!count($records)) {
 			return false;
 		}
-		$table = new stdClass();
+		$table = new html_table();
 		$strstud = get_string('student','praxe');
 		$strstatus = get_string('status','praxe');
 		$strschool = get_string('school','praxe');
@@ -134,7 +135,7 @@ class praxe_view_extteacher extends praxe_view {
 			$row[] = "<a href=\"$url\" title=\"\">".get_string('detail','praxe')."</a>";
 			$table->data[] = $row;
 		}
-		return html_writer::table($table,true);
+		return html_writer::table($table);
 	}
 	private function show_all_my_locations($bOnlyActual = 0, $year = 0) {
 		global $USER, $CFG, $tab_modes, $DB, $OUTPUT;
@@ -149,10 +150,7 @@ class praxe_view_extteacher extends praxe_view {
 		$stryear = get_string('year','praxe');
 		$strterm = get_string('term','praxe');
 		$table->head = array($strname, $strsubject, $strisced, $strstudy, $stryear, $strterm, get_string('active','praxe'), get_string('edit'));
-		//$table->head[] = get_string('create_new_by_copy','praxe');
 		$table->align = array ('left', 'left', 'left', 'left', 'center', 'center', 'center');
-		//$table->align[] = 'center';
-		$data = array();
 		$stredit = get_string('edit');
 		foreach($all as $loc) {
 			if($loc->teacherid != $USER->id) {
@@ -164,19 +162,14 @@ class praxe_view_extteacher extends praxe_view {
 			$row[] = ($loc->active == 1) ? get_string('yes') : get_string('no');
 			if(praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && $USER->id == $loc->teacherid)
 				&& !$DB->get_record('praxe_records', array('location' => $loc->id))) {
-
-				$icon = new pix_icon('edit',$stredit,'moodle',array('src'=>$OUTPUT->pix_url('t/edit')));
 				$row[] = $OUTPUT->action_icon(praxe_get_base_url(array("mode"=>$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_EDITLOCATION],"locationid"=>$loc->id)),
-                                            $icon);
+                                                new pix_icon('edit',$stredit,'moodle',array('src'=>$OUTPUT->pix_url('t/edit'))));
 			}else{
 				$row[] = get_string('already_used','praxe');
 			}
-			//$par = "&amp;mode=".$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_COPYLOCATION]."&amp;locationid=$loc->id";
-			//$row[] = "<a title=\"".get_string('copy')."\" href=\"".praxe_get_base_url().$par."\">".get_string('copy')."</a> ";
-			$data[] = $row;
+			$table->data[] = $row;
 		}
-		if(count($data)) {
-			$table->data = $data;
+		if(count($table->data)) {
 			return html_writer::table($table);
 		}
 		return get_string('nolocationsavailable','praxe');
@@ -187,29 +180,36 @@ class praxe_view_extteacher extends praxe_view {
 	 * @return string
 	 */
 	public function show_record_detail($rec) {
-		global $mode, $USER, $CFG;
+	    global $mode, $USER, $CFG, $OUTPUT;
 		/// left top table ///
-		$tab1 = new stdClass();
+		$tab1 = new html_table();
 		$tab1->align = array('right', 'left');
-		$tab1->width = '40%';
-		$tab1->class = "floatinfotable left twocolstable";
-		$tab1->data[] = array(get_string('school','praxe').": ", $rec->name);
-		$tab1->data[] = array(get_string('subject','praxe').": ", $rec->subject);
+		//$tab1->width = '40%';
+		$tab1->attributes['class'] = "floatinfotable left twocolstable";
+		$tab1->data[] = array(get_string('school','praxe').":", $rec->name);
+		$tab1->data[] = array(get_string('subject','praxe').":", $rec->subject);
 		if($USER->id != $rec->teacherid) {
-			$tab1->data[] = array(get_string('teacher','praxe').": ", praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname)));
+			$tab1->data[] = array(get_string('teacher','praxe').":", praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname)));
 		}
 		/// right top table ///
-		$tab2 = new stdClass();
+		$tab2 = new html_table();
 		$tab2->align = array('right', 'left');
-		$tab2->width = '40%';
-		$tab2->class = "floatinfotable right twocolstable";
-		$tab2->data[] = array(get_string('student', 'praxe').": ", praxe_get_user_fullname($rec->student));
-		$tab2->data[] = array(get_string('status','praxe').": ", praxe_get_status_info($rec->status));
-		$return = html_writer::table($tab1, true) . html_writer::table($tab2, true) . '<div class="clearer"></div>';
+		//$tab2->width = '40%';
+		$tab1->attributes['class'] = "floatinfotable right twocolstable";
+		$tab2->data[] = array(get_string('student', 'praxe').":", praxe_get_user_fullname($rec->student));
+		$tab2->data[] = array(get_string('status','praxe').":", praxe_get_status_info($rec->status));
+	    if($rec->status == PRAXE_STATUS_ASSIGNED) {
+			$tab2->data[] = array(get_string('action').':', self::confirm_location_form($rec->id));
+			return html_writer::table($tab1) . html_writer::table($tab2) . '<div class="clearer"></div>';
+		}
+
+		$return = html_writer::table($tab1) . html_writer::table($tab2) . '<div class="clearer"></div>';
 		$return .= "<h3>".get_string('schedule','praxe')."</h3>";
-		if(!is_array($schedules = praxe_get_schedules($rec->id))) {
+		$schedules = praxe_get_schedules($rec->id);
+		if(!$schedules) {
 			return $return . get_string('no_schedule_items','praxe');
 		}
+
 		$sched = array();
 		$cols = array();
 		foreach($schedules as $sch) {
@@ -222,78 +222,65 @@ class praxe_view_extteacher extends praxe_view {
 			}
 		}
 		/// schedule table ///
-		$tab3 = new stdClass();
+		$tab3 = new html_table();
 		sort($cols);
 		$tab3->head = $cols;
 		array_unshift($tab3->head, get_string('date'));
 		for($i = 1; $i < count($tab3->head); $i++) {
 			$tab3->head[$i] = s($tab3->head[$i]).".".get_string('lesson','praxe');
 		}
+        $cellf = new html_table_cell();
+		$cellf->attributes['class'] = "header first";
+		$cellf->header = true;
+		$paramsToAssing = array('post_form'=>'assigntoinspection', 'sesskey'=>sesskey(), 'submitbutton'=>'true', 'userid'=>$USER->id);
 		foreach($sched as $row) {
-			$datetd = userdate($row['date'],get_string('strftimeday','praxe'))."<br />".userdate($row['date'],get_string('strftimedateshort'));
-			$r = array($datetd);
-			$r3 = "<th class=\"header first\">$datetd</th>";
+		    $datetd = userdate($row['date'],get_string('strftimeday','praxe'))."<br />".userdate($row['date'],get_string('strftimedateshort'));
+			$cell = clone $cellf;
+			$cell->text = $datetd;
+			$cells = array($cell);
 			foreach($cols as $k=>$c) {
 				if(isset($row[$c])) {
-					//if($row[$c]->lesnumber == $cols[$c]) {
-						$item = userdate($row[$c]->timestart,get_string('strftimetime'))." - ".userdate($row[$c]->timeend,get_string('strftimetime'))
-								."<br>".s($row[$c]->lessubject)
-								."<br>".get_string('schoolroom','praxe').": ".s($row[$c]->schoolroom);
-						$item = "<div><a href=\"".praxe_get_base_url(array("mode"=>$mode,"recordid"=>$rec->id,"scheduleid"=>$row[$c]->id))."\" title=\"".get_string('detail','praxe')."\">$item</a>"
-								."</div>";
-						if(count($row[$c]->inspectors)) {
-							foreach($row[$c]->inspectors as $insp) {
-								$item .= "<div class=\"inspector right\">".$OUTPUT->render(new pix_icon('icon_inspect',get_string('inspection','praxe'),'praxe'))."&nbsp;".praxe_get_user_fullname($insp)."</div>";
-							}
-						}else if(praxe_has_capability('assignselftoinspection')) {
-							$add_insp = "<div class=\"inspector right\"><form method=\"post\">";
-							$add_insp .= '<input type="hidden" name="post_form" value="assigntoinspection" />';
-							$add_insp .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-							$add_insp .= '<input type="hidden" name="scheduleid" value="'.$row[$c]->id.'" />';
-							$add_insp .= '<input type="hidden" name="userid" value="'.$USER->id.'" />';
-							$add_insp .= '<input type="hidden" name="submitbutton" value="true" />';
-							$add_insp .= '<input type="submit" name="submitconfirm" value="'.get_string('gotoinspection','praxe').'" />';
-							$add_insp .= '</form></div>';
-							$item .= $add_insp;
+					$item = userdate($row[$c]->timestart,get_string('strftimetime'))." - ".userdate($row[$c]->timeend,get_string('strftimetime'))
+							."<br>".s($row[$c]->lessubject)
+							."<br>".get_string('schoolroom','praxe').": ".s($row[$c]->schoolroom);
+					$item = "<div>"
+						    .$OUTPUT->action_link(praxe_get_base_url(array("mode"=>$mode,"recordid"=>$rec->id,"scheduleid"=>$row[$c]->id)),$item, null, array('title'=>get_string('detail','praxe')))
+							."</div>";
+					if(count($row[$c]->inspectors)) {
+						foreach($row[$c]->inspectors as $insp) {
+						    $item .= "<div class=\"inspector right\">"
+							        .$OUTPUT->render(new pix_icon('icon_inspect',get_string('inspection','praxe'),'praxe'))
+							        ."&nbsp;".praxe_get_user_fullname($insp);
+							$item .= "</div>";
 						}
-						$r[] = $item;
-						$r3 .= "<td>$item</td>";
-					//}
+					}else if(praxe_has_capability('assignselftoinspection')) {
+						$params = $paramsToAssing;
+						$params['scheduleid'] = $row[$c]->id;
+						/// assign inspector button ///
+						$item .= "<div class=\"inspector right\">"
+						        .$OUTPUT->single_button(praxe_get_base_url($params),get_string('gotoinspection','praxe'),'post')
+						        .'</div>';
+					}
+					$cells[] = new html_table_cell($item);
 				}else {
-					$r[] = '&nbsp;';
-					$r3 .= '<td>&nbsp;</td>';
+					$cells[] = new html_table_cell('&nbsp;');
 				}
 			}
-			$tab3->data[] = $r3;
+			$tab3->data[] = new html_table_row($cells);
 		}
-		$t3 = "<table cellspacing=\"1\" class=\"scheduletable boxalignleft\">\n<tbody>\n";
-		$t3 .= "<tr>\n";
-		foreach($tab3->head as $i=>$th) {
-			if($i == 0) {
-				$t3 .= "<th class=\"header first\">$th</th>";
-			}else {
-				$t3 .= "<th class=\"header\">$th</th>";
-			}
-		}
-		$t3 .= "</tr>\n";
-		foreach($tab3->data as $tr) {
-			$t3 .= "<tr>$tr</tr>";
-		}
-		$t3 .= "</tbody></table>";
-		return $return . $t3;
+		return $return . html_writer::table($tab3);
 	}
 	public function show_schedule_detail($schedule) {
-		$tab2 = new stdClass();
+		$tab2 = new html_table();
 		$tab2->align = array('right', 'left');
-		$tab2->size = array('150px');
 		$tab2->cellpadding = '2px';
-		$tab2->class = "twocolstable";
-		$tab2->data[] = array(get_string('time').": ", userdate($schedule->timestart, get_string('strftimedayshort'))."&nbsp;&nbsp;".userdate($schedule->timestart,get_string('strftimetime'))." - ".userdate($schedule->timeend,get_string('strftimetime')));
-		$tab2->data[] = array(get_string('schoolroom','praxe').": ", s($schedule->schoolroom));
-		$tab2->data[] = array(get_string('yearclass','praxe').": ", praxe_get_yearclass($schedule->yearclass));
-		$tab2->data[] = array(get_string('subject','praxe').": ", s($schedule->lessubject));
-		$tab2->data[] = array(get_string('lesson_theme','praxe').": ", format_text($schedule->lestheme));
-		return "<h3>".get_string('lessondetail','praxe')."</h3>".html_writer::table($tab2,true);
+		$tab2->attributes['class'] = "twocolstable";
+		$tab2->data[] = array(get_string('time').":", userdate($schedule->timestart, get_string('strftimedayshort'))."&nbsp;&nbsp;".userdate($schedule->timestart,get_string('strftimetime'))." - ".userdate($schedule->timeend,get_string('strftimetime')));
+		$tab2->data[] = array(get_string('schoolroom','praxe').":", s($schedule->schoolroom));
+		$tab2->data[] = array(get_string('yearclass','praxe').":", praxe_get_yearclass($schedule->yearclass));
+		$tab2->data[] = array(get_string('subject','praxe').":", s($schedule->lessubject));
+		$tab2->data[] = array(get_string('lesson_theme','praxe').":", format_text($schedule->lestheme));
+		return "<h3>".get_string('lessondetail','praxe')."</h3>".html_writer::table($tab2);
 	}
 	/**
 	 *

@@ -2,7 +2,10 @@
 $cancel = optional_param('cancelbutton',null,PARAM_ALPHA);
 $confirm = optional_param('confirmsubmitbutton',null,PARAM_ALPHA);
 if(!is_null($cancel)) {
-	redirect(praxe_get_base_url());
+    if($praxeaction == 'deleteschedule') {
+	    redirect(praxe_get_base_url(array('mode'=>'schedule')));
+    }
+    redirect(praxe_get_base_url());
 }
 $echo = '<div class="center">';
 switch($praxeaction) {
@@ -19,7 +22,7 @@ switch($praxeaction) {
 		}
 		if(is_null($confirm)) {
 			$echo .= '<div class="before_form">'.get_string('realy_delete_schedule','praxe').'</div>';
-			$table = new stdClass();
+			$table = new html_table();
 			$yc = $schedule->yearclass;
 			if($schedule->yearclass >= 6 && $schedule->yearclass <= 9) {
 				$yc = PRAXE_ISCED_2_TEXT." $yc.";
@@ -33,7 +36,6 @@ switch($praxeaction) {
 								get_string('schoolroom','praxe'),
 								get_string('subject','praxe')
 							);
-			$table->data = array();
 			$table->data[] = array(	userdate((int)$schedule->timestart, get_string('strftimedateshort')),
 									(int)$schedule->lesnumber.".",
 									date('G:i',(int)$schedule->timestart)." - ".date('G:i',(int)$schedule->timeend),
@@ -41,7 +43,7 @@ switch($praxeaction) {
 									s($schedule->schoolroom),
 									s($schedule->lessubject)
 								);
-			$echo .= html_writer::table($table,true);
+			$echo .= html_writer::table($table);
 			$f = '<form method="post" class="confirmform"><input type="hidden" name="scheduleid" value="'.$schedule->id.'">';
 			$f .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
 			$f .= '<div class="fitem center" style="margin: 10px 0;">';
@@ -54,7 +56,7 @@ switch($praxeaction) {
 			require_sesskey();
 			$post = (object) array('id'=>$scheduleid, 'deleted'=>1);
 			$DB->update_record('praxe_schedules',$post);
-			redirect(praxe_get_base_url());
+			redirect(praxe_get_base_url(array('mode'=>'schedule')));
 		}
 		break;
 	case 'confirmschedule':
@@ -67,7 +69,7 @@ switch($praxeaction) {
 		}
 		$post = (object) array('id'=>$praxe->rec_id,'status'=>PRAXE_STATUS_SCHEDULE_DONE);
 		if($DB->update_record('praxe_records',$post) && $teachermail == 1) {
-			$emfrom = get_user_info_from_db('id',$praxe->rec_student);
+			$emfrom = get_complete_user_data('id',$praxe->rec_student);
 			require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 			$mail = new praxe_mailing();
 			$fak = new stdClass();
@@ -77,12 +79,11 @@ switch($praxeaction) {
 			$emtext = get_string('confirmschedule_mail','praxe',$fak);
 			$mail->setPlain($emtext);
 			$mail->setHtml($emtext);
-			$emuser = get_user_info_from_db('id',$praxe->location->teacherid);
+			$emuser = get_complete_user_data('id',$praxe->location->teacherid);
 			$mail->mailToUser($emuser, $emfrom);
 		};
-		redirect(praxe_get_base_url());
+		redirect(praxe_get_base_url(array('mode'=>'schedule')));
 		break;
 }
 $echo .= "</div>";
-echo $echo;// . praxe_praxehome_buttons();
-//echo $pacon;
+echo $echo;

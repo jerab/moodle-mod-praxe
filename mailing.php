@@ -22,8 +22,13 @@ class praxe_mailing {
 	public function addLinkToFoot($link, $text) {
 		$this->linkstofoot[] = (object)array('link'=>$link, 'text'=>$text);
 	}
-	public function mailToUser($userto, $userfrom, $praxe = null) {
-		$html = $this->makeMailHtml($this->html, $userto);
+	/**
+	 *
+	 * @param stdClass $user  A {@link $USER} object
+	 * @param stdClass $user  A {@link $USER} object
+	 */
+	public function mailToUser($userto, $userfrom) {
+	    $html = $this->makeMailHtml($this->html, $userto);
 		$plain = $this->makeMailText($this->plain, $userto);
 		$site = get_site();
 		$subject = format_string($site->shortname).": ".$this->subject;
@@ -83,24 +88,22 @@ class praxe_mailing {
 	 * @return string The email text in HTML format
 	 */
 	private function makeMailHtml($post, $userto) {
-	    global $CFG, $cm;
+	    global $CFG, $cm, $OUTPUT;
 	    if ($userto->mailformat != 1) {  // Needs to be HTML
 	        return '';
 	    }
 		$praxe = praxe_record::getData();
 	    $site = get_site();
-	    $strpraxes = get_string('modulenameplural', 'praxe');
 	    $posthtml = '<head>';
-	    foreach ($CFG->stylesheets as $stylesheet) {
-	        $posthtml .= '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />'."\n";
-	    }
+	    /*foreach ($CFG->stylesheets as $stylesheet) {
+		    $posthtml .= '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />'."\n";
+        }*/
 	    $posthtml .= '</head>';
 	    $posthtml .= "\n<body id=\"email\">\n\n";
-	    $posthtml .= '<div class="navbar">'.
-	    '<a target="_blank" href="'.$CFG->wwwroot.'/course/view.php?id='.$this->course->id.'">'.$this->course->shortname.'</a> &raquo; '.
-	    '<a target="_blank" href="'.$CFG->wwwroot.'/mod/praxe/index.php?id='.$this->course->id.'">'.$strpraxes.'</a> &raquo; '.
-	    '<a target="_blank" href="'.$CFG->wwwroot.'/mod/praxe/view.php?id='.$cm->id.'">'.format_string($praxe->name,true).'</a>';
-	    $posthtml .= '</div>';
+	    $posthtml .= '<div class="navbar">'
+	                . $OUTPUT->action_link($CFG->wwwroot.'/course/view.php?id='.$this->course->id, $this->course->shortname)
+	    			. " &raquo; ".$OUTPUT->action_link(praxe_get_base_url(), format_string($praxe->name,true))
+	    			. '</div>';
 		if(strlen($this->subject)) {
 	    	$posthtml .= '<div class="subject">'.format_text($this->subject).'</div>';
 	    }
@@ -109,10 +112,9 @@ class praxe_mailing {
 	    }
 	    $posthtml .= "<hr /><div class=\"mdl-align unsubscribelink\">";
 	    foreach($this->linkstofoot as $link) {
-	    	//$posthtml .= "<a href=\"".$CFG->wwwroot.'/course/view.php?id='.$cm->id."\">".get_string('confirmorrefusestudent','praxe')."</a><br /><br />";
-	    	$posthtml .= "<a href=\"$link->link\">$link->text</a>&nbsp;";
+	    	$posthtml .= $OUTPUT->action_link($link->link,$link->text)."&nbsp;";
 	    }
-        $posthtml .= "<br /><br /><a href=\"{$CFG->wwwroot}\">&nbsp;{$site->shortname}</a></div>";
+        $posthtml .= "</div><div class=\"mdl-align unsubscribelink\">".$OUTPUT->action_link($CFG->wwwroot,$site->shortname)."</div>";
 	    $posthtml .= '</body>';
 	    return $posthtml;
 	}

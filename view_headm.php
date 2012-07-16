@@ -142,6 +142,12 @@ class praxe_view_headm extends praxe_view {
 		}
 		return html_writer::table($table);
 	}
+	/**
+	 *
+	 * @param int $schoolid
+	 * @param array $editlinkparams [optional]
+	 * @return string - table parsed by html_writer
+	 */
 	public function show_school($schoolid, $editlinkparams = array()) {
 		global $USER, $OUTPUT;
 

@@ -1,8 +1,9 @@
 <?php
 /**
- * This page prints a particular instance of praxe_record for students
+ * This page prints a particular instance of praxe_record(s) for student role
  *
- * @author  jerab
+ * @author  Tomas Jerabek <t.jerab@gmail.com>
+ * @version
  * @package mod/praxe
  */
 /// extending class for classes "praxe_view_[role]" ///
@@ -11,10 +12,10 @@ class praxe_view_student extends praxe_view {
 	public $form = null;
 
 	function praxe_view_student() {
-		global $CFG, $tab, $cm, $tab_modes, $context;
-		$viewaction = optional_param('viewaction',null);
-		$schoolid = optional_param('schoolid',null,PARAM_INT);
-		if($viewaction == 'viewschool' && !is_null($schoolid)) {
+		global $CFG, $tab, $tab_modes, $context, $DB;
+		$viewaction = optional_param('viewaction',null, PARAM_ALPHA);
+		$schoolid = optional_param('schoolid',0,PARAM_INT);
+		if($viewaction == 'viewschool' && $schoolid) {
 			require_once($CFG->dirroot . '/mod/praxe/view_headm.php');
 			$this->content .= praxe_view_headm::show_school($schoolid);
 			$this->content .= praxe_praxehome_buttons(false);
@@ -22,59 +23,54 @@ class praxe_view_student extends praxe_view {
 			$status = praxe_record::getData('rec_status');
 			switch($tab) {
 				case PRAXE_TAB_STUDENT_HOME :
-					$after_tab = '';
-					$strtd = get_string('todo','praxe');
+				    $after_tab = '';
 					$strd = get_string('done','praxe');
-					$row = array(0=>$strtd, 1=>$strtd, 2=>$strtd, 3=>$strtd);
+					$strinpr = get_string('inprocess','praxe');
+					$cell = new html_table_cell(get_string('todo','praxe'));
+					$cell->attributes['class'] = 'cell center';
+					$cell1 = clone $cell;
+					$cell2 = clone $cell;
 					if(is_null($status)) {
 						$this->content .= '<div class="before_form">'.get_string('assigntolocation_text_forstudents', 'praxe').'</div>';
 						$this->content .= self::make_assigntolocation_form();
 						$this->content .= "<hr>";
-					}else if($status == PRAXE_STATUS_REFUSED) {
-						$this->content .= self::make_assigntolocation_form();
-					}else if($status == PRAXE_STATUS_ASSIGNED) {
-					}else if($status == PRAXE_STATUS_SCHEDULE_DONE) {
-						$row[0] = $strd;
-						$row[1] = $strd;
-					}else if($status == PRAXE_STATUS_CONFIRMED) {
-						$row[0] = $strd;
-						$schlink = praxe_get_base_url(array("mode"=>$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
-						$after_tab .= "<div>".get_string('you_should_create_schedule','praxe').": <a href=\"$schlink\">".get_string('my_schedule','praxe')."</a></div>";
-					}else if($status == PRAXE_STATUS_EVALUATED) {
-						$row[0] = $strd;
-						$row[1] = $strd;
-						$row[2] = $strd;
-					}
-				/// table of parts of student's practice ///
-					$table = '<table cellspacing="1" cellpadding="5" width="80%" class="praxe generaltable boxaligncenter">';
-					$table .= '<tbody><tr>';
-					///create head of table
-					$head = array(	get_string('choosing_location','praxe'),
-									get_string('schedule','praxe'), //'creating_schedule'
-									get_string('evaluated','praxe'),
-									get_string('praxe_completed','praxe')
-								);
-					foreach($head as $th) {
-						$table .= '<th scope="col" class="header">'.$th.'</th>';
-					}
-					$table .= '</tr><tr class="lastrow">';
-					/// create body of table
-					foreach($row as $td) {
-						$class = 'red';
-						if($td == $strd) {
-							$class = 'green';
+					}else {
+						$this->content .= "<div class=\"status_infobox\"><strong>".get_string('status','praxe').": </strong>".praxe_get_status_info($status, 'student')."</div>";
+					    if($status == PRAXE_STATUS_REFUSED) {
+							$this->content .= '<div class="before_form">'.get_string('assigntolocation_text_forstudents', 'praxe').'</div>';
+					        $this->content .= self::make_assigntolocation_form();
+						}else if($status == PRAXE_STATUS_ASSIGNED) {
+						    $cell->text = $strinpr;
+						    $cell->attributes['class'] .= ' orange';
+						}else if($status == PRAXE_STATUS_SCHEDULE_DONE) {
+							$cell->text = $strd;
+							$cell->attributes['class'] .= ' green';
+							$cell1->text = $strd;
+							$cell1->attributes['class'] .= ' green';
+						}else if($status == PRAXE_STATUS_CONFIRMED) {
+							$cell->text = $strd;
+							$cell->attributes['class'] .= ' green';
+							$schlink = praxe_get_base_url(array("mode"=>$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
+							$after_tab .= "<div class=\"infobox center\"><div>".get_string('you_should_create_schedule','praxe').": <a href=\"$schlink\">".get_string('my_schedule','praxe')."</a></div></div>";
+						}else if($status == PRAXE_STATUS_EVALUATED) {
+							$cell->text = $strd;
+							$cell->attributes['class'] .= ' green';
+							$cell1->text = $strd;
+							$cell1->attributes['class'] .= ' green';
+							$cell2->text = $strd;
+							$cell2->attributes['class'] .= ' green';
 						}
-						$table .= '<td class="cell center '.$class.'">'.$td.'</td>';
 					}
-					$table .= '</tr></tbody></table>';
-				/// end of table ///
-					if(!is_null($status)) {
-						$this->content = "<div class=\"status_infobox\"><strong>".get_string('status','praxe').": </strong>".praxe_get_status_info($status)."</div>".$this->content;
-					}
-					$this->content .= $table;
-					if(strlen($after_tab)) {
-						$this->content .= "<div class=\"infobox center\">$after_tab</div>";
-					}
+				    /// table of parts of student's practice ///
+					$table = new html_table();
+					$table->attributes['class'] = 'praxe generaltable boxaligncenter status';
+					$table->head = array(get_string('choosing_location','praxe'),
+									    get_string('schedule','praxe'), //'creating_schedule'
+									    get_string('evaluated','praxe'));
+									    //get_string('praxe_completed','praxe'));
+					$table->data[] = new html_table_row(array($cell,$cell1,$cell2));
+					$this->content .= html_writer::table($table);
+					$this->content .= $after_tab;
 					break;
 				case PRAXE_TAB_STUDENT_MYSCHOOL :
 					$this->content .= self::show_location(praxe_record::getData('rec_location'));
@@ -87,7 +83,7 @@ class praxe_view_student extends praxe_view {
 					$schedules = praxe_get_schedules(praxe_record::getData('rec_id'),array('timestart','lesnumber'));
 					self::show_schedule($schedules, false, $editlinks);
 					/// schedule confirm form for validation ///
-					if(is_array($schedules)) {
+					if($schedules) {
 						$f = '<form method="post" class="form confirmschedule center">';
 						$f .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />'
 							.'<input type="hidden" name="praxeaction" value="confirmschedule" />';
@@ -101,16 +97,12 @@ class praxe_view_student extends praxe_view {
 						$f .= '</form>';
 						$this->content .= $f;
 					}
-					//$this->content .= "<a href=\"".praxe_get_base_url()."&amp;mode=".$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE]."\">".get_string('addtoschedule', 'praxe')."</a>";
-					//require_once($CFG->dirroot . '/mod/praxe/c_makeschedule.php');
-					//$this->form = new praxe_makeschedule();
 					break;
 				case PRAXE_TAB_STUDENT_ADDSCHEDULE :
 					require_capability('mod/praxe:addstudentschedule', $context);
 					require_once($CFG->dirroot . '/mod/praxe/c_makeschedule.php');
 					$this->form = new praxe_makeschedule();
-					$edit = optional_param('edit',null);
-					if($edit) {
+					if(!is_null(optional_param('edit',null,PARAM_TEXT))) {
 						$scheduleid = optional_param('scheduleid',0,PARAM_INT);
 						if($schedule = $DB->get_record('praxe_schedules', array('id' => $scheduleid, 'record' => praxe_record::getData('rec_id')))) {
 							if(!$this->form->set_form_to_edit($schedule)) {
@@ -122,15 +114,13 @@ class praxe_view_student extends praxe_view {
 					}
 					break;
 				default:
-					redirect($CFG->wwwroot.'/mod/praxe/view.php?id='.$cm->id);
+					redirect(praxe_get_base_url());
 					break;
 			}
 		}
 	}
 	public function make_assigntolocation_form($edit=false) {
-		global $CFG, $USER;
-		//require_once($CFG->dirroot . '/mod/praxe/c_assigntolocation.php');
-		//$this->form = new praxe_assigntolocation();
+		global $CFG, $USER, $OUTPUT;
 		$locations = praxe_get_available_locations($USER->id, praxe_record::getData('isced'), praxe_record::getData('studyfield'));
 		if(!is_array($locations) ||!count($locations)) {
 			 return get_string('nolocationsavailable', 'praxe');
@@ -141,18 +131,17 @@ class praxe_view_student extends praxe_view {
 		if($edit) {
 			$form .= '<input type="hidden" name="edit" value="changelocation" />';
 		}
-    	$table = new stdClass();
+    	$table = new html_table();
     	$table->head = array('',
     						get_string('school','praxe'),
     						get_string('subject','praxe'),
     						get_string('teacher','praxe')
     					);
-		$table->align = array('center','left','center','center');
+        $table->colclasses = array('praxe_cell center', 'praxe_cell left', 'praxe_cell center', 'praxe_cell center');
 		foreach($locations as $loc) {
-    		$row = array('<input id="praxe_loc_'.$loc->id.'" type="radio" name="location" value="'.$loc->id.'" />');
-    		$sch = "<a href=\"".praxe_get_base_url(array("viewaction"=>'viewschool',"schoolid"=>$loc->school))."\" title=\"".get_string('school_detail','praxe')."\">".s($loc->name)."</a>";
+    		$sch = $OUTPUT->action_link(praxe_get_base_url(array("viewaction"=>'viewschool',"schoolid"=>$loc->school)), s($loc->name), null, array('title'=>get_string('school_detail','praxe')));
     		$sch .= "<div class=\"praxe_detail\">".s($loc->street).', '.s($loc->city)."</div>";
-    		$row[] = $sch;
+    		$row = array('<input id="praxe_loc_'.$loc->id.'" type="radio" name="location" value="'.$loc->id.'" />', $sch);
     		$row[] = s($loc->subject);
 			if(!is_null($loc->teacherid)) {
     			$teacher = (object) array('id' => $loc->teacherid, 'firstname' => s($loc->teacher_name), 'lastname' => s($loc->teacher_lastname));
@@ -161,10 +150,8 @@ class praxe_view_student extends praxe_view {
     			$row[] = '';
     		}
     		$table->data[] = $row;
-    		//$row .= '<label for="praxe_loc_'.$loc->id.'">'.$text.'</label>';
-    		//$form .= "<div class=\"tr\">$row</div>";
     	}
-		$form .= html_writer::table($table,true);
+		$form .= html_writer::table($table);
 		$form .= '<div class="fitem center" style="margin: 10px 0;">'
 					.'<input type="submit" id="id_submitbutton" value="'.get_string('submit').'" name="submitbutton" />';
 		if($edit) {
@@ -173,28 +160,26 @@ class praxe_view_student extends praxe_view {
 		$form .= '</div>';
 		$form .= '</form>';
 		return "<div>$form</div>";
-		//$this->content .= "<div>$form</div>";
 	}
 	public function change_location_form() {
 		return self::make_assigntolocation_form(true);
 		//$this->form->_form->addElement('hidden','edit','changelocation');
 	}
 	public function show_location($id) {
-		global $CFG;
+		global $OUTPUT;
 		if($data = praxe_get_location($id)) {
 			//print_object($data);
-			$table = new stdClass();
+			$table = new html_table();
     		$table->head = array(get_string('school','praxe'),
     							get_string('subject','praxe'),
     							get_string('teacher','praxe')
     						);
 			$table->align = array('left','center','center');
-			$sch = "<a href=\"".praxe_get_base_url(array("viewaction"=>'viewschool',"schoolid"=>$data->school))."\" title=\"".get_string('school_detail','praxe')."\">".s($data->name)."</a>";
-    		$sch .= "<table cellpadding=\"5\"><tbody>";
-    		$sch .= "<tr><td style=\"text-align: right; vertical-align: top;\">".get_string('address','praxe').":</td><td>".s($data->street).', '.s($data->zip)."&nbsp;&nbsp;".s($data->city)."</td></tr>";
+    		$sch = new html_table();
+			$sch->data[] = array(get_string('address','praxe').":", s($data->street).', '.s($data->zip)."&nbsp;&nbsp;".s($data->city));
     		if(!is_null($data->headmaster)) {
     			$headmaster = (object)array('id'=>$data->headmaster, 'firstname'=>$data->head_name, 'lastname'=>$data->head_lastname);
-    			$sch .= "<tr><td style=\"text-align: right; vertical-align: top;\">".get_string('headmaster','praxe').":</td><td>".praxe_get_user_fullname($headmaster)."</td></tr>";
+    			$sch->data[] = array(get_string('headmaster','praxe').":", praxe_get_user_fullname($headmaster));
     		}
     		$contact = array();
     		if(is_string($data->phone) && strlen($data->phone)) {
@@ -206,10 +191,9 @@ class praxe_view_student extends praxe_view {
 			if(is_string($data->website) && strlen($data->website)) {
     			$contact[] = format_string($data->website);
     		}
-    		$sch .= "<tr><td style=\"text-align: right; vertical-align: top;\">".get_string('contact','praxe').":</td><td>".implode("<br>",$contact)."</td></tr>";
-    		$sch .= "</tbody></table>";
-			$row[] = $sch;
-    		$row[] = s($data->subject);
+    		$sch->data[] = array(get_string('contact','praxe').":",implode("<br />",$contact));
+			$schlink = $OUTPUT->action_link(praxe_get_base_url(array("viewaction"=>'viewschool',"schoolid"=>$data->school)),s($data->name),null,array('title'=>get_string('school_detail','praxe')));
+			$row = array($schlink . html_writer::table($sch), s($data->subject));
 			if(!is_null($data->teacherid)) {
     			$teacher = (object) array('id' => $data->teacherid, 'firstname' => s($data->teacher_name), 'lastname' => s($data->teacher_lastname));
     			$row[] = praxe_get_user_fullname($teacher);
@@ -217,14 +201,14 @@ class praxe_view_student extends praxe_view {
     			$row[] = get_string('unlisted','praxe');
     		}
     		$table->data[] = $row;
-			return html_writer::table($table,true);
+			return html_writer::table($table);
 		}
 		return '';
 	}
 
 	public function show_schedule($schedules, $boolReturn = true, $editlinks = array()) {
 		global $CFG, $OUTPUT;
-		if(!is_array($schedules)) {
+		if(!$schedules) {
 			$ret = get_string('no_schedule_items','praxe');
 			if($boolReturn) {
 				return $ret;
@@ -233,7 +217,7 @@ class praxe_view_student extends praxe_view {
 				return true;
 			}
 		}
-		$table = new stdClass();
+		$table = new html_table();
 		$table->head = array(	get_string('date'),
 								get_string('lesson_number','praxe'),
 								get_string('time'),
@@ -245,8 +229,9 @@ class praxe_view_student extends praxe_view {
 								get_string('inspection','praxe')
 							);
 		$table->align = array('left', 'center', 'center', 'center', 'center', 'left', 'left', 'center', 'center');
-		$table->data = array();
 		$editable = praxe_has_capability('editstudentschedule') || praxe_has_capability('manageallincourse');
+		$params = $editlinks;
+		$delparams = array('praxeaction'=>'deleteschedule');
 		foreach($schedules as $item) {
 			$row = array(	userdate((int)$item->timestart, get_string('strftimedateshort')),
 							(int)$item->lesnumber.".",
@@ -256,30 +241,29 @@ class praxe_view_student extends praxe_view {
 							s($item->lessubject),
 							format_text($item->lestheme)
 						);
-			if($editable && ($item->timestart-PRAXE_TIME_TO_EDIT_SCHEDULE) > mktime()) {
-				$params = $editlinks;
+			if($editable && ($item->timestart-PRAXE_TIME_TO_EDIT_SCHEDULE) > time()) {
 				$params['scheduleid'] = $item->id;
-				$delparams = array('praxeaction'=>'deleteschedule');
 				$delparams['scheduleid'] = $item->id;
 				$row[] = $OUTPUT->action_icon(praxe_get_base_url($params), new pix_icon('t/edit',get_string('edit')))
 				         .$OUTPUT->action_icon(praxe_get_base_url($delparams), new pix_icon('t/delete',get_string('delete')));
 			}else {
 				$row[] = "---";
 			}
-			$ins = "";
 			if(count($item->inspectors)) {
-				foreach($item->inspectors as $insp) {
+				$ins = "";
+			    foreach($item->inspectors as $insp) {
 					$ins .= "<div class=\"inspector right\">".$OUTPUT->render(new pix_icon('icon_inspect',get_string('inspection','praxe'),'praxe'))."&nbsp;".praxe_get_user_fullname($insp)."</div>";
 				}
+				$row[] = $ins;
+			}else {
+			    $row[] = "&nbsp;";
 			}
-			$row[] = $ins;
 			$table->data[] = $row;
 		}
-		$ret = html_writer::table($table, true);
 		if($boolReturn) {
-			return $ret;
+			return html_writer::table($table);
 		}else {
-			$this->content .= $ret;
+			$this->content .= html_writer::table($table);
 			return true;
 		}
 	}

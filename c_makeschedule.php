@@ -1,9 +1,4 @@
 <?php
-
-/**
- *
- */
-
 require_once ('c_actionform.php');
 
 class praxe_makeschedule extends praxe_actionform {
@@ -11,10 +6,9 @@ class praxe_makeschedule extends praxe_actionform {
 		parent::praxe_actionform(get_class($this));
 	}
     public function definition() {
-    	//global $USER;
-    	//print_object($mform->getRegisteredTypes());
-		$mform =& $this->_form;
-    	$mform->addElement('hidden', 'post_form', 'makeschedule');
+	$mform =& $this->_form;
+
+        $mform->addElement('hidden', 'post_form', 'makeschedule');
     	$options = array(	'startyear' => praxe_record::getData('year'),
                  			'stopyear'  => praxe_record::getData('year'),
                  			'applydst'  => true,
@@ -41,14 +35,16 @@ class praxe_makeschedule extends praxe_actionform {
         $mform->setDefault('lessubject', praxe_record::$data->location->subject);
         $mform->addRule('lessubject', null, 'required', null, 'client');
 
-        $options = array('canUseHtmlEditor'=>'detect',
-                            'rows'  => 30,
-                            'cols'  => 65,
-                            'width' => 0,
-                            'height'=> 0,
-                            'course'=> 0,
-                           );
-        $mform->addElement('editor', 'lestheme', get_string('lesson_theme','praxe'), $options);
+        /*$options = array(
+		    'subdirs'=>0,
+		    'maxbytes'=>0,
+		    'maxfiles'=>0,
+		    'changeformat'=>0,
+		    'context'=>null,
+		    'noclean'=>0,
+		    'trusttext'=>0);*/
+        $mform->addElement('editor', 'lestheme', get_string('lesson_theme','praxe'));
+        $mform->setType('lestheme', PARAM_RAW);
         $this->add_action_buttons();
     }
 
@@ -58,17 +54,18 @@ class praxe_makeschedule extends praxe_actionform {
      * @return bool - if this item is editable, returns "true", otherwise "false"
      */
     public function set_form_to_edit($data) {
-    	$mform =& $this->_form;
     	// date and time of this schedule to edit has expired ///
     	if($data->timestart-PRAXE_TIME_TO_EDIT_SCHEDULE < mktime()) {
     		return false;
     	}
-    	foreach($data as $k=>$v) {
+    	$mform =& $this->_form;
+    	foreach((array)$data as $k=>$v) {
     		if($mform->elementExists($k)) {
-    			if($k != 'lestheme') {
-    				$v = s($v);
+    			if($k == 'lestheme') {
+                    $mform->setDefault($k,array('text'=>$v));
+    			}else {
+    			    $mform->setDefault($k,s($v));
     			}
-    			$mform->setDefault($k,$v,true);
     		}
     	}
     	$mform->addElement('hidden', 'edit', 'true');

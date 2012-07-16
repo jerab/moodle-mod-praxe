@@ -250,7 +250,7 @@ function praxe_get_location($id, $teacherid = null) {
 }
 function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	global $cm, $course, $CFG, $DB;
-	if(!is_array($all = praxe_get_locations($isced, $studyfield, true))) {
+	if(!is_array($all = praxe_get_locations($isced, $studyfield, true, true))) {
 		return false;
 	}
 	/// used locations in all instances of praxe, which are set iqual like this instance (term, year, studyfield,isced) ///
@@ -380,8 +380,7 @@ function praxe_get_record($recordid) {
 			LEFT JOIN {praxe_locations} loc ON(location = loc.id)
 			LEFT JOIN {praxe_schools} school ON(school = school.id)
 			LEFT JOIN {praxe_school_teachers} ext ON(teacher = ext.id)
-			LEFT JOIN {user} teacher ON(teacher.id = ext_teacher)
-			WHERE rec.id = $recordid";
+			LEFT JOIN {user} teacher ON(teacher.id = ext_teacher) WHERE rec.id = {$recordid}";
 	return $DB->get_record_sql($sql);
 }
 function praxe_get_schedule($schid) {
@@ -433,7 +432,7 @@ function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 	}
 	$sql .= " ORDER BY ".implode(', ',$order);
 	$ret = $DB->get_records_sql($sql);
-	if(!is_array($ret)) {
+	if(!$ret) {
 		return $ret;
 	}
 	$rr = array();
@@ -505,13 +504,17 @@ function praxe_get_schooltype_info($schooltype) {
 	}
 	return '';
 }
-function praxe_get_status_info($statusvalue) {
+function praxe_get_status_info($statusvalue, $role = 'global') {
 	switch($statusvalue) {
 		case PRAXE_STATUS_ASSIGNED :
 			$text = get_string('status_assigned_text','praxe');
 			break;
 		case PRAXE_STATUS_REFUSED :
-			$text = get_string('status_refused_text','praxe');
+			if($role == 'student') {
+			    $text = get_string('status_refused_text_for_student','praxe');
+			}else {
+		        $text = get_string('status_refused_text','praxe');
+			}
 			break;
 		case PRAXE_STATUS_CONFIRMED :
 			$text = get_string('status_confirmed_text','praxe');
@@ -550,16 +553,16 @@ function praxe_get_use_status_of_location($locid, $year=null) {
 	global $CFG, $DB;
 	$sql = "SELECT rec.*, stud.firstname, stud.lastname
 			FROM {praxe_records} rec
-			LEFT JOIN {user} stud ON(student = stud.id)";
-	$where = array('rec.location'=>$locid);
+			LEFT JOIN {user} stud ON(student = stud.id) WHERE";
+	$where = " rec.location = ".$locid;
 	if(!is_null($year)) {
-		$where = array($where, 'AND', array('year' => (int)$year));
+		$where .= ' AND year = '.(int)$year;
 	}
-	if($ret = $DB->get_record_sql($sql,$where,true)){
+	if($ret = $DB->get_record_sql($sql.$where)){
 	    if($ret->status == PRAXE_STATUS_REFUSED) {
 			return praxe_get_status_info($ret->status).' '.get_string('available_location','praxe');
 		}else{
-			return praxe_get_status_info($ret->status);
+		    return praxe_get_status_info($ret->status);
 		}
 	}
 	return get_string('available_location','praxe');
@@ -660,10 +663,12 @@ class praxe_record {
 	function praxe_record($userid) {
 		global $cm, $course, $praxe, $DB;
 		praxe_record::$data = $praxe;
-		if($result = $DB->get_record('praxe_records', array('praxe' => $praxe->id, 'student' => $userid))) {
+		if($result = $DB->get_records('praxe_records', array('praxe' => $praxe->id, 'student' => $userid), 'timecreated DESC')) {
+		    $result = array_shift($result);
 			foreach($result as $col=>$val) {
 					$name = "rec_$col";
 					praxe_record::$data->$name = $val;
+
 			}
 			praxe_record::$data->location = praxe_get_location($result->location);
 		}
