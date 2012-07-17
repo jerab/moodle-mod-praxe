@@ -83,7 +83,7 @@ class praxe_view_extteacher extends praxe_view {
 		if(is_null($praxeid)) {
 			$praxeid = praxe_record::getData('id');
 		}
-		$all = praxe_get_praxe_records($praxeid, $order);
+		$all = praxe_get_praxe_records($praxeid, $order, null, null, true);
 		if(is_array($all)) {
 			foreach($all as $k=>$rec) {
 				if($rec->teacherid == $userid) {
@@ -108,13 +108,12 @@ class praxe_view_extteacher extends praxe_view {
 		$strstatus = get_string('status','praxe');
 		$strschool = get_string('school','praxe');
 		$strsubject = get_string('subject','praxe');
-		$strteacher = get_string('teacher','praxe');
 		if(praxe_has_capability('viewrecordstoanylocation') || praxe_has_capability('manageallincourse')) {
 			$viewteacher = true;
-			$table->head  = array ($strstud, $strschool, $strsubject, $strteacher, $strstatus, '&nbsp;');
+			$table->head  = array ($strstud, $strschool, $strsubject, get_string('teacher','praxe'), $strstatus, '&nbsp;');
 		}else {
 			$viewteacher = false;
-			$table->head  = array ($strstud, $strschool, $strsubject, $strstatus, '&nbsp;');
+			$table->head  = array ($strstud, $strschool, $strsubject, $strstatus, get_string('inspection','praxe'), '&nbsp;');
 		}
 		$table->align = array ('left', 'left', 'left', 'center', 'center');
 		foreach($records as $rec) {
@@ -126,11 +125,21 @@ class praxe_view_extteacher extends praxe_view {
 			if($viewteacher) {
 				$row[] = praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname));
 			}
-			$stat = praxe_get_status_info($rec->status);
+
 			if($rec->status == PRAXE_STATUS_ASSIGNED) {
-				$stat = self::confirm_location_form($rec->id);
+				$row[] = self::confirm_location_form($rec->id);
+			}else {
+			    $row[] = praxe_get_status_info($rec->status);
 			}
-			$row[] = $stat;
+
+			if(isset($rec->inspections)) {
+			    $inspText = array();
+			    foreach($rec->inspections as $insp) {
+			        $inspText[] = praxe_get_user_fullname((object)array('id'=>$insp->userid, 'firstname'=>$insp->firstname, 'lastname'=>$insp->lastname))
+			                        . " (".userdate($insp->timestart,get_string('strftimedateshort')).")";
+			    }
+			    $row[] = implode('<br />',$inspText);
+			}
 			$url = praxe_get_base_url(array('mode'=>$mode,'recordid'=>$rec->id));
 			$row[] = "<a href=\"$url\" title=\"\">".get_string('detail','praxe')."</a>";
 			$table->data[] = $row;

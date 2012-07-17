@@ -25,12 +25,13 @@ define('PRAXE_TAB_VIEW_TEACHER',1);
 define('PRAXE_TAB_VIEW_EDITTEACHER',2);
 define('PRAXE_TAB_VIEW_EXTTEACHER',3);
 define('PRAXE_TAB_VIEW_HEADM',4);
+
 define('PRAXE_TAB_STUDENT_HOME',0);
 define('PRAXE_TAB_STUDENT_MYSCHOOL',1);
 define('PRAXE_TAB_STUDENT_SCHEDULE',2);
 define('PRAXE_TAB_STUDENT_EDITLOC',3);
 define('PRAXE_TAB_STUDENT_ADDSCHEDULE',4);
-//define('PRAXE_TAB_TEACHER_HOME',0);
+
 define('PRAXE_TAB_EDITTEACHER_HOME',0);
 define('PRAXE_TAB_EDITTEACHER_SCHOOLS',1);
 define('PRAXE_TAB_EDITTEACHER_ADDSCHOOL',2);
@@ -40,11 +41,13 @@ define('PRAXE_TAB_EDITTEACHER_ASSIGNTEACHERS',5);
 define('PRAXE_TAB_EDITTEACHER_EDITSCHOOL',6);
 define('PRAXE_TAB_EDITTEACHER_LOCATIONS',7);
 define('PRAXE_TAB_EDITTEACHER_ADDLOCATION',8);
+
 define('PRAXE_TAB_EXTTEACHER_HOME',0);
 define('PRAXE_TAB_EXTTEACHER_MYLOCATIONS',1);
 define('PRAXE_TAB_EXTTEACHER_MYSCHOOLS',2);
 define('PRAXE_TAB_EXTTEACHER_EDITLOCATION',3);
 define('PRAXE_TAB_EXTTEACHER_COPYLOCATION',4);
+
 define('PRAXE_TAB_HEADM_HOME',0);
 define('PRAXE_TAB_HEADM_ADDSCHOOL',1);
 define('PRAXE_TAB_HEADM_TEACHERS',2);
@@ -278,10 +281,11 @@ function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
  * @param array $order [optional]
  * @param int $teacherid [optional]
  * @param int $studentid [optional]
+ * @param bool $bInspect [optional] - include the records of inspections in schedule of each record or not
  *
  * @return array
  */
-function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = null, $studentid = null) {
+function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = null, $studentid = null, $bInspect = false) {
 	global $CFG,$DB;
 	$sql = "SELECT rec.*, loc.subject, loc.id as locid, school.name as schoolname, school.id as schoolid,
 			stud.firstname, stud.lastname, stud.id as userid, ext.id as extteacherid,
@@ -311,7 +315,25 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 		$order = implode(',',$order);
 	}
 	$sql .= " order by $order";
-	return $DB->get_records_sql($sql);
+
+	$records = $DB->get_records_sql($sql);
+
+	if($bInspect) {
+		foreach($records as $rec) {
+	        /// schedule is already done and confirmed ///
+	        if($rec->status >= PRAXE_STATUS_SCHEDULE_DONE) {
+	            $sql = "SELECT insp.id, sch.timestart, user.id as userid,user.firstname,user.lastname
+	            		FROM {praxe_schedules} sch
+	            		JOIN {praxe_schedule_inspections} insp ON(insp.schedule = sch.id)
+	            		JOIN {user} user ON(user.id = insp.inspector)
+	            		WHERE sch.record = {$rec->id} AND sch.deleted IS NULL";
+	            $rec->inspections = $DB->get_records_sql($sql);
+	        }else {
+	            $rec->inspections = array();
+	        }
+		}
+    }
+	return $records;
 }
 /**
  *
