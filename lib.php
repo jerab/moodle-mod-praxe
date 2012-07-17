@@ -221,4 +221,18 @@ function praxe_get_instance($course, $isced='', $studyfield='') {
 
 	return false;
 }
+
+/**
+ * Indicates API features that the praxe supports.
+ *
+ * @param string $feature
+ * @return mixed True if yes (some features may use other values)
+ */
+function praxe_supports($feature) {
+    switch($feature) {
+        case FEATURE_BACKUP_MOODLE2:          return true;
+
+        default: return null;
+    }
+}
 ?>
