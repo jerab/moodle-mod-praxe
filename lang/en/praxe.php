@@ -146,6 +146,7 @@ $string['praxename_help'] = 'Praxe help';
 $string['realy_delete_schedule'] = 'You are going to delete the item of schedule below';
 $string['records_list'] = 'List of practices';
 $string['refuse'] = 'Refuse';
+$string['removeinspection'] = 'Revoke user from inspection';
 $string['removed_from_inspection'] = 'User has been revoked from inspection';
 $string['schedule'] = 'Schedule';
 $string['schedule_item_added'] = 'New date has been added to the schedule';
