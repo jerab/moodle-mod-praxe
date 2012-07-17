@@ -158,13 +158,13 @@
 			    $bManage = praxe_has_capability('manageallincourse');
 			    if(!is_null($edit)) {
 			        $post->id = required_param('locationid',PARAM_INT);
-			        $used = $DB->get_record('praxe_records', array('location' => $post->id));
+			        $used = $DB->record_exists_select('praxe_records', 'location = '.$post->id.' AND status <> '.PRAXE_STATUS_REFUSED);
 			    }else {
 			        $used = false;
 			    }
 			    /// it is not supposed to be teacher or admin role (but extteacher or headmaster) and not selected by student ///
-			    if($bManage || !$used) {
-				    $post->school = required_param('school',PARAM_INT);
+			    if($bManage && !$used) {
+			        $post->school = required_param('school',PARAM_INT);
 				    $post->teacher = required_param('teacher',PARAM_INT);
 				    $post->studyfield = required_param('studyfield',PARAM_INT);
 				    $post->isced = required_param('isced',PARAM_INT);
@@ -188,13 +188,8 @@
 						if(!$school && !$ext) {
 							print_error('notallowedaction', 'praxe');
 						}
-					}else{
-						/// if this location is used, not allows to edit it ///
-						$true = (praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && praxe_get_location($post->id,$USER->id))
-								&& !$used);
-						if(!$true) {
-							print_error('notallowedaction', 'praxe');
-						}
+					}else if(!(praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && praxe_get_location($post->id,$USER->id)))) {
+						print_error('notallowedaction', 'praxe');
 					}
 				}
 				$redurl = optional_param('redurl',praxe_get_base_url(),PARAM_URL);
@@ -342,6 +337,7 @@
    	        case 'addlocation' :
     	        $params['mode'] = ($viewrole == 'EXTTEACHER') ? 'mylocations' : 'locations';
     	        $params['schoolid'] = optional_param('school',0,PARAM_INT);
+    	        break;
    	        /// student role ///
     	    case 'makeschedule' :
    	            $params['mode'] = 'schedule';
@@ -353,7 +349,7 @@
     		unset($_POST[$k]);
     	}
 
-    	//echo new moodle_url('/mod/praxe/view.php',$params);
+    	//echo praxe_get_base_url($params);
     	redirect(praxe_get_base_url($params),get_string('action_canceled','praxe'),1);
     }
 ?>

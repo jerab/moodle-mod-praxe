@@ -668,14 +668,7 @@ function praxe_get_years_for_filter($active = null, $school = null, $bOnlyActual
  */
 function praxe_is_location_fully_editable($locid) {
     global $DB;
-	$sql = "SELECT rec.id
-			FROM {praxe_records} rec
-			LEFT JOIN {user} stud ON(student = stud.id) WHERE rec.location = {$locid}";
-	$loc = $DB->get_record_sql($sql);
-	if(!$loc) {
-	    return true;
-	}
-    return false;
+	return !$DB->record_exists_select('praxe_records', 'location = '.$locid.' AND status <> '.PRAXE_STATUS_REFUSED);
 }
 function praxe_print_tab_footer() {
 	echo "</div></div>";

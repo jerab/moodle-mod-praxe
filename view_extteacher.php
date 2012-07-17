@@ -169,10 +169,9 @@ class praxe_view_extteacher extends praxe_view {
 			$row[] = s($loc->year);
 			$row[] = praxe_get_term_text($loc->term);
 			$row[] = ($loc->active == 1) ? get_string('yes') : get_string('no');
-			if(praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && $USER->id == $loc->teacherid)
-				&& !$DB->get_record('praxe_records', array('location' => $loc->id))) {
+			if(praxe_has_capability('editanylocation') || (praxe_has_capability('editownlocation') && $USER->id == $loc->teacherid)) {
 				$row[] = $OUTPUT->action_icon(praxe_get_base_url(array("mode"=>$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_EDITLOCATION],"locationid"=>$loc->id)),
-                                                new pix_icon('edit',$stredit,'moodle',array('src'=>$OUTPUT->pix_url('t/edit'))));
+                                                new pix_icon('t/edit',$stredit));
 			}else{
 				$row[] = get_string('already_used','praxe');
 			}

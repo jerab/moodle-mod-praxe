@@ -97,7 +97,7 @@ class praxe_mailing {
 	    $posthtml = '<head>';
 	    /*foreach ($CFG->stylesheets as $stylesheet) {
 		    $posthtml .= '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />'."\n";
-        }*/
+        }TODO*/
 	    $posthtml .= '</head>';
 	    $posthtml .= "\n<body id=\"email\">\n\n";
 	    $posthtml .= '<div class="navbar">'
