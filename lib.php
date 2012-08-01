@@ -37,8 +37,8 @@ define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
  * @return int The id of the newly inserted newmodule record
  */
 function praxe_add_instance($praxe) {
-    global $DB;	    
-	$praxe->timecreated = time();    
+    global $DB;
+	$praxe->timecreated = time();
     return $DB->insert_record('praxe', $praxe);
 }
 
@@ -80,14 +80,14 @@ function praxe_delete_instance($id) {
     	foreach($records as $rec) {
 	    	if($sches = $DB->get_records('praxe_schedules',array('record' => $rec->id))) {
 	    		foreach($sches as $sch) {
-			    	$DB->delete_records('praxe_schedules_inspections', array('schedule' => $sch->id));		    	
+			    	$DB->delete_records('praxe_schedules_inspections', array('schedule' => $sch->id));
 	    			$DB->delete_records('praxe_schedules_notices', array('schedule' => $sch->id));
 	    		}
 	    		$DB->delete_records('praxe_schedules', array('record' => $rec->id));
-	    	}	    	
+	    	}
     	}
     	$DB->delete_records('praxe_records', array('praxe' => $praxe->id));
-    }	
+    }
     $DB->delete_records('praxe', array('id' => $praxe->id));
     return true;
 }
@@ -230,7 +230,7 @@ function praxe_get_instance($course, $isced='', $studyfield='') {
  */
 function praxe_supports($feature) {
     switch($feature) {
-        case FEATURE_BACKUP_MOODLE2:          return true;
+        //case FEATURE_BACKUP_MOODLE2:          return true;
 
         default: return null;
     }
