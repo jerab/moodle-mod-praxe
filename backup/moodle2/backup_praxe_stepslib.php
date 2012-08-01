@@ -98,7 +98,7 @@ class backup_praxe_activity_structure_step extends backup_activity_structure_ste
             $inspection->set_source_table('praxe_schedule_inspections', array('schedule' => backup::VAR_PARENTID));
             $notice->set_source_table('praxe_schedule_notices', array('schedule' => backup::VAR_PARENTID));
         }
-
+		// TODO - upravit backup/restore s uzivateli....
         // Define id annotations
         $school->annotate_ids('user','headmaster');
         $school->annotate_ids('user','usermodified');

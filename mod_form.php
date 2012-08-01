@@ -72,7 +72,7 @@ class mod_praxe_mod_form extends moodleform_mod {
 		$mform->addElement('select', 'isced', get_string('iscedlevel', 'praxe'), $options);
 		$mform->addRule('isced', null, 'required', null, 'client');
 	///	Adding the "year" select field to choose the calendar year for current course
-		$actualyear = (int)date('Y',mktime());
+		$actualyear = (int)date('Y',time());
 		$options = array(	$actualyear => $actualyear,
 							($actualyear+1) => ($actualyear+1),
 							($actualyear+2) => ($actualyear+2));

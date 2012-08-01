@@ -35,7 +35,7 @@
 				            print_error('notallowedaction', 'praxe');
 				}
 
-				if(!has_capability('mod/praxe:beexternalteacher',$context,$post->ext_teacher)) {
+				if(!praxe_is_user_in_cohort($post->ext_teacher, PRAXE_COHORT_EXTTEACHERS)) {
 					print_error('notallowedaction', 'praxe');
 				}
 
@@ -68,14 +68,14 @@
 
 				/// this location is already used by other student ///
 				if($rec = $DB->get_record('praxe_records', array('location' => $location->id, 'praxe' => praxe_record::getData('id')))) {
-					if($rec->status != PRAXE_STATUS_REFUSED || $rec->student == $student) {
+					if($rec->status != PRAXE_STATUS_REFUSED || $rec->student == $post->student) {
 						redirect(praxe_get_base_url(), get_string('location_no_available','praxe'));
 					}
 				}
 
 				$post->timecreated = time();
 				$post->timemodified = time();
-				$DB->delete_records('praxe_records', array('praxe' => $praxe, 'student' => $student));
+				$DB->delete_records('praxe_records', array('praxe' => $praxe, 'student' => $post->student));
 
 				$id = false;
 				$id = $DB->insert_record('praxe_records', $post);
@@ -87,7 +87,7 @@
 						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
 						$mail = new praxe_mailing();
 						$stud = new stdClass();
-						$stud->name = fullname($efrom);
+						$stud->name = fullname($emfrom);
 						$stud->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));
 						$stud->subject = s($location->subject);
 						$stud->school = s($location->name);
@@ -284,10 +284,10 @@
 				$post->lessubject = required_param('lessubject',PARAM_TEXT);
 				$post->lesnumber = optional_param('lesnumber',0,PARAM_INT);
 				$post->schoolroom = optional_param('schoolroom','',PARAM_TEXT);
-				$post->lestheme = optional_param('lestheme','',PARAM_CLEANHTML);
+				$post->lestheme = optional_param_array('lestheme','',PARAM_RAW);
 				$post->lestheme = $post->lestheme['text'];
-				$timestart = required_param('timestart', PARAM_CLEAN);
-				$timeend = required_param('timeend', PARAM_CLEAN);
+				$timestart = required_param_array('timestart', PARAM_INT);
+				$timeend = required_param_array('timeend', PARAM_INT);
 				$post->timestart = mktime($timestart['hour'],$timestart['minute'], null, $timestart['month'],$timestart['day'],$timestart['year']);
 				$post->timeend = mktime($timeend['hour'],$timeend['minute'], null, $timeend['month'],$timeend['day'],$timeend['year']);
 

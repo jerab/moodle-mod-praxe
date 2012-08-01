@@ -80,7 +80,7 @@ class praxe_view_headm extends praxe_view {
 		require_once($CFG->dirroot . '/mod/praxe/c_addlocation.php');
 		$this->form = new praxe_addlocation();
 	}
-	public function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0, $year = 0) {
+	public static function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0, $year = 0) {
 		global $USER, $cm, $OUTPUT;
 		$schoolid = ($schoolid) ? $schoolid : null;
 		$locs = praxe_get_locations_by_schooldata($schoolid, $headmid, $bOnlyActual, $year);
@@ -100,7 +100,7 @@ class praxe_view_headm extends praxe_view {
 		$h[] = get_string('actual_status','praxe');
 		$h[] = get_string('active','praxe');
 		$table->head = $h;
-		$table->align = array ('left', 'left', 'left', 'left', 'left', 'center');
+		$table->align = array ('left', 'left', 'left', 'left', 'left', 'center','center','left','center');
 		$table->data = array();
 		$stredit = get_string('edit');
 		foreach($locs as $loc) {
@@ -129,7 +129,7 @@ class praxe_view_headm extends praxe_view {
 					$params[s($name)] = s($val);
 				}
 				$row[] = $OUTPUT->action_icon(praxe_get_base_url($params), new pix_icon('t/edit',$stredit));
-				if(count($table->head) == 7) {
+				if(count($table->head) < count($row)) {
 					$table->head[] = get_string('edit');
 					$table->align[] = 'center';
 				}
@@ -148,7 +148,7 @@ class praxe_view_headm extends praxe_view {
 	 * @param array $editlinkparams [optional]
 	 * @return string - table parsed by html_writer
 	 */
-	public function show_school($schoolid, $editlinkparams = array()) {
+	public static function show_school($schoolid, $editlinkparams = array()) {
 		global $USER, $OUTPUT;
 
 		if(!$school = praxe_get_school($schoolid)) {
@@ -192,7 +192,7 @@ class praxe_view_headm extends praxe_view {
 	 * Extra parameters to be added must be in array format as nameOfParameter=>value
 	 * @return string
 	 */
-	public function show_schools($schools, $editlinkparams = array()) {
+	public static function show_schools($schools, $editlinkparams = array()) {
 		global $USER, $OUTPUT;
 
 		$table = new html_table();
@@ -241,8 +241,7 @@ class praxe_view_headm extends praxe_view {
 	 * @param int $schoolid [optional][default null]
 	 * @return string - if no records, returns empty string
 	 */
-	public function school_teachers_by_schools($headm = null, $schoolid = null) {
-		//global $course, $CFG;
+	public static function school_teachers_by_schools($headm = null, $schoolid = null) {
 		$ret = '';
 		$ext = praxe_get_ext_teachers_at_school($headm, $schoolid);
 		if(!$ext) {
@@ -285,5 +284,4 @@ class praxe_view_headm extends praxe_view {
 		return $ret;
 	}
 }
-/// no schools assigned to user yet ///
 ?>

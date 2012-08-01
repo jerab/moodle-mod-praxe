@@ -37,17 +37,8 @@ define('PRAXE_TERM_SS_TEXT',get_string('summerterm','praxe'));
  * @return int The id of the newly inserted newmodule record
  */
 function praxe_add_instance($praxe) {
-    global $DB;
-	/// if exists any instance of the same ISCED,STUDY FIELD in this course returns id of that instance
-    /*
-	if( ($idPraxe = praxe_get_instance($praxe->course)) !== false ) {
-    	return false;//(int)$idPraxe;
-    }
-    */
-	$praxe->timecreated = time();
-    //$praxe->studyfield = '';
-    //$praxe->isced = '';
-
+    global $DB;	    
+	$praxe->timecreated = time();    
     return $DB->insert_record('praxe', $praxe);
 }
 
@@ -81,14 +72,23 @@ function praxe_update_instance($praxe) {
 function praxe_delete_instance($id) {
     global $DB;
 
-    if (! $praxe = $DB->get_record('praxe', array('id' => $id))) {
+    if (!$praxe = $DB->get_record('praxe', array('id' => $id))) {
         return false;
     }
 
-    if (! $DB->delete_records('praxe', array('id' => $praxe->id))) {
-        return false;
-    }
-
+    if($records = $DB->get_records('praxe_records',array('praxe' => $praxe->id))) {
+    	foreach($records as $rec) {
+	    	if($sches = $DB->get_records('praxe_schedules',array('record' => $rec->id))) {
+	    		foreach($sches as $sch) {
+			    	$DB->delete_records('praxe_schedules_inspections', array('schedule' => $sch->id));		    	
+	    			$DB->delete_records('praxe_schedules_notices', array('schedule' => $sch->id));
+	    		}
+	    		$DB->delete_records('praxe_schedules', array('record' => $rec->id));
+	    	}	    	
+    	}
+    	$DB->delete_records('praxe_records', array('praxe' => $praxe->id));
+    }	
+    $DB->delete_records('praxe', array('id' => $praxe->id));
     return true;
 }
 

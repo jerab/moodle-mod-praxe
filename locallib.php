@@ -1,4 +1,7 @@
 <?php
+define('PRAXE_COHORT_HEADMASTERS', 'EXTHEADM');
+define('PRAXE_COHORT_EXTTEACHERS', 'EXTTEACH');
+
 define('PRAXE_TIME_TO_EDIT_SCHEDULE', 60*60*6); // hours before curent time when the availability of student to edit his schedule expires
 define('PRAXE_SCHOOL_TYPE_1',1);
 define('PRAXE_SCHOOL_TYPE_1_TEXT',get_string('typeschool1','praxe'));
@@ -260,7 +263,7 @@ function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	$sql = "SELECT rec.location, rec.*
 				FROM {praxe_records} rec
 				INNER join {praxe} praxe ON (praxe = praxe.id)
-				WHERE year = ".date('Y',mktime())." AND term = ".praxe_record::getData('term')."
+				WHERE year = ".date('Y',time())." AND term = ".praxe_record::getData('term')."
 				AND studyfield = ".praxe_record::getData('studyfield')."
 				AND (status <> ".PRAXE_STATUS_REFUSED." OR student = ".$user.")";
 	/// selection of location with specific isced level ///
@@ -519,6 +522,23 @@ function praxe_get_base_url($params = array()) {
 	$params = array_merge(array('id'=>$cm->id),$params);
 	return new moodle_url("/mod/praxe/view.php",$params);
 }
+
+/**
+ * @param string $cidnumber - idnumber of cohort
+ * @return array of users in specific cohort
+ */
+function praxe_get_cohort_members($cidnumber) {
+    global $DB;
+    $sql = "SELECT u.id, u.firstname, u.lastname, u.email
+              FROM {cohort} c
+              JOIN {cohort_members} cm ON cm.cohortid = c.id
+              JOIN {user} u ON u.id = cm.userid
+             WHERE c.idnumber = '{$cidnumber}'
+          ORDER BY u.lastname, u.firstname";
+    $members = $DB->get_records_sql($sql);
+    return ($members) ? $members : array();
+}
+
 function praxe_get_schooltype_info($schooltype) {
 	eval('$type = PRAXE_SCHOOL_TYPE_'.$schooltype.'_TEXT;');
 	if(is_string($type)) {
@@ -526,6 +546,7 @@ function praxe_get_schooltype_info($schooltype) {
 	}
 	return '';
 }
+
 function praxe_get_status_info($statusvalue, $role = 'global') {
 	switch($statusvalue) {
 		case PRAXE_STATUS_ASSIGNED :
@@ -670,6 +691,17 @@ function praxe_is_location_fully_editable($locid) {
     global $DB;
 	return !$DB->record_exists_select('praxe_records', 'location = '.$locid.' AND status <> '.PRAXE_STATUS_REFUSED);
 }
+
+function praxe_is_user_in_cohort($userid, $cidnumber) {
+    global $DB;
+    $sql = "SELECT cm.userid
+              FROM {cohort} c
+              JOIN {cohort_members} cm ON cm.cohortid = c.id
+             WHERE c.idnumber = '{$cidnumber}' AND cm.userid = {$userid}";
+
+    return (bool)$DB->get_record_sql($sql);
+}
+
 function praxe_print_tab_footer() {
 	echo "</div></div>";
 }
@@ -699,7 +731,7 @@ class praxe_record {
 	 * @param string $var[optional] - if not set, all object of data will be return.
 	 * @return mixed / NULL
 	 */
-	public function getData($var = null) {
+	public static function getData($var = null) {
 		if(is_null($var)){
 			return praxe_record::$data;
 		}

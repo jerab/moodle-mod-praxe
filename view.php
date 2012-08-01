@@ -44,33 +44,15 @@ if ($id) {
 
 require_login($course, true, $cm);
 
-//add_to_log($course->id, "praxe", "view", "view.php?id=$cm->id", "$praxe->id");
-
 /// Print the page header
 $strpraxes = get_string('modulenameplural', 'praxe');
 $strpraxe  = get_string('modulename', 'praxe');
 
-$navlinks = array();
-$navlinks[] = array('name' => $strpraxes, 'link' => "index.php?id=$course->id", 'type' => 'activity');
-$navlinks[] = array('name' => format_string($praxe->name), 'link' => '', 'type' => 'activityinstance');
-
-$navigation = build_navigation($navlinks);
-
 $PAGE->set_url('/mod/praxe/view.php', array('id'=>$cm->id));
 $PAGE->set_title(format_string($praxe->name));
-$PAGE->set_heading('');
-$PAGE->set_focuscontrol('');
-$PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, $strpraxe));
-$PAGE->set_headingmenu(navmenu($course, $cm));
-echo $OUTPUT->header();
-
-/// Print the main part of the page
-echo "<script type=\"text/javascript\" src=\"praxe.js\"></script>";
-
+$PAGE->set_heading(format_string($course->fullname));
 
 $context = context_module::instance($cm->id);
-//print_object($context);
 /// user record of praxe - for users as student in praxe_records. set info of praxe in this course ///
 $oPraxeRecord = new praxe_record($USER->id);
 $praxeaction = optional_param('praxeaction', null, PARAM_ALPHAEXT);
@@ -108,8 +90,11 @@ if(!is_null($post_form)) {
 	require_once($CFG->dirroot . '/mod/praxe/post.php');
 }
 
+echo $OUTPUT->header();
+/// Print the main part of the page
+echo "<script type=\"text/javascript\" src=\"praxe.js\"></script>";
+
 if(isset($viewrole) && is_null($praxeaction)) {
-	//echo "<h2>$role_title</h2>";
 	/// set type of tabs to view ///
 	$tabview = constant('PRAXE_TAB_VIEW_'.$viewrole);
 	if(false === ($tab = array_search($mode,$tab_modes[strtolower($viewrole)]))) {

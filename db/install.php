@@ -44,11 +44,6 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
-function xmldb_praxe_install() {
-    //global $CFG;
-    return true;
-}
-
 function xmldb_praxe_install_recovery() {
     //global $CFG;
     return false;

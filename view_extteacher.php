@@ -62,17 +62,7 @@ class praxe_view_extteacher extends praxe_view {
 				$this->form->set_form_to_edit($loc);
 				break;
 			case PRAXE_TAB_EXTTEACHER_COPYLOCATION :
-				/*
-				$locid = required_param('locationid',PARAM_INT);
-				if(!$loc = praxe_get_location($locid, $USER->id)) {
-					print_error('notallowedaction', 'praxe');
-				}
-				require_once($CFG->dirroot . '/mod/praxe/c_addlocation.php');
-				$this->form = new praxe_addlocation($loc->school);
-				//$this->form->set_redirect_url(null, array('mode'=>$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_MYLOCATIONS]));
-				//$this->form->set_form_to_edit($loc);
-				$this->form->set_form_to_copy($loc);
-				*/
+				// TODO
 				break;
 			default:
 				break;
@@ -94,10 +84,10 @@ class praxe_view_extteacher extends praxe_view {
 		return $ret;
 	}
 
-	public function show_records($records = array()) {
+	public static function show_records($records = array()) {
 		global $USER, $mode;
-		/// no records set and this method is called from this class ///
-		if(!count($records) && get_class($this) == 'praxe_view_extteacher') {
+		/// no records set ///
+		if(!count($records)) {
 			$records = self::active_actual_user_records($USER->id, null, array('status','name','lastname','firstname'));
 		}
 		if(!count($records)) {
@@ -110,12 +100,14 @@ class praxe_view_extteacher extends praxe_view {
 		$strsubject = get_string('subject','praxe');
 		if(praxe_has_capability('viewrecordstoanylocation') || praxe_has_capability('manageallincourse')) {
 			$viewteacher = true;
-			$table->head  = array ($strstud, $strschool, $strsubject, get_string('teacher','praxe'), $strstatus, '&nbsp;');
+			$table->head  = array ($strstud, $strschool, $strsubject, get_string('teacher','praxe'), $strstatus, get_string('inspection','praxe'), '&nbsp;');
+			$table->align = array ('left', 'left', 'left', 'center', 'center', 'center', 'center');
 		}else {
 			$viewteacher = false;
 			$table->head  = array ($strstud, $strschool, $strsubject, $strstatus, get_string('inspection','praxe'), '&nbsp;');
+			$table->align = array ('left', 'left', 'left', 'center', 'center', 'center');
 		}
-		$table->align = array ('left', 'left', 'left', 'center', 'center');
+
 		foreach($records as $rec) {
 			$row = array();
 			$user = (object) array('firstname'=>$rec->firstname, 'lastname'=>$rec->lastname, 'id'=>$rec->userid);
@@ -132,13 +124,15 @@ class praxe_view_extteacher extends praxe_view {
 			    $row[] = praxe_get_status_info($rec->status);
 			}
 
-			if(isset($rec->inspections)) {
+			if(isset($rec->inspections) && count($rec->inspections)) {
 			    $inspText = array();
 			    foreach($rec->inspections as $insp) {
 			        $inspText[] = praxe_get_user_fullname((object)array('id'=>$insp->userid, 'firstname'=>$insp->firstname, 'lastname'=>$insp->lastname))
 			                        . " (".userdate($insp->timestart,get_string('strftimedateshort')).")";
 			    }
 			    $row[] = implode('<br />',$inspText);
+			}else {
+			    $row[] = "---";
 			}
 			$url = praxe_get_base_url(array('mode'=>$mode,'recordid'=>$rec->id));
 			$row[] = "<a href=\"$url\" title=\"\">".get_string('detail','praxe')."</a>";
@@ -187,7 +181,7 @@ class praxe_view_extteacher extends praxe_view {
 	 * @param object $rec - object of praxe record to be shown
 	 * @return string
 	 */
-	public function show_record_detail($rec) {
+	public static function show_record_detail($rec) {
 	    global $mode, $USER, $CFG, $OUTPUT;
 		/// left top table ///
 		$tab1 = new html_table();

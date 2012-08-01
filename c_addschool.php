@@ -65,7 +65,9 @@ class praxe_addschool extends praxe_actionform {
         $mform->addRule('website', get_string('maximumchars', '', 100), 'maxlength', 100, 'client');
 
         if(has_capability('mod/praxe:manageallincourse', $context)) {
-        	$headms = get_users_by_capability($context, 'mod/praxe:beheadmaster', 'u.id, u.firstname, u.lastname', null, null, null, null, null, false);
+        	//TODO - nacist uzivatele z cohort EXTHEADM
+        	praxe_get_cohort_members('EXTHEADM');
+        	$headms = praxe_get_cohort_members(PRAXE_COHORT_HEADMASTERS);
         	if($headms) {
         		$options = array(0=>get_string('noselection','praxe'));
         		foreach($headms as $h) {

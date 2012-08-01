@@ -55,7 +55,7 @@ class praxe_makeschedule extends praxe_actionform {
      */
     public function set_form_to_edit($data) {
     	// date and time of this schedule to edit has expired ///
-    	if($data->timestart-PRAXE_TIME_TO_EDIT_SCHEDULE < mktime()) {
+    	if($data->timestart-PRAXE_TIME_TO_EDIT_SCHEDULE < time()) {
     		return false;
     	}
     	$mform =& $this->_form;

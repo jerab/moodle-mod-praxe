@@ -26,7 +26,7 @@ class praxe_assignteachers extends praxe_actionform {
  		$mform->addElement('hidden', 'teacher_school', $this->schoolid);
  		$mform->addElement('static', 'static1', get_string('school','praxe'), s($school->name));
 
- 		$ext = get_users_by_capability($context, 'mod/praxe:beexternalteacher', 'u.id, u.firstname, u.lastname','lastname, firstname', null, null, null, null, null, false);
+ 		$ext = praxe_get_cohort_members(PRAXE_COHORT_EXTTEACHERS);//get_users_by_capability($context, 'mod/praxe:beexternalteacher', 'u.id, u.firstname, u.lastname','lastname, firstname', null, null, null, null, null, false);
     	if(is_array($ext) && count($ext)) {
 	    	if(is_array($used_ext = praxe_get_ext_teachers_at_school(null,$this->schoolid))) {
 		 		foreach($used_ext as $t) {
