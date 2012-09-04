@@ -70,7 +70,7 @@ foreach ($praxes as $praxe) {
         $groups = $DB->get_records_sql("SELECT g.*
     									FROM {groupings_groups} gg
     									LEFT JOIN {groups} g on(groupid = g.id)
-    									WHERE groupingid = $praxe->groupingid");
+    									WHERE groupingid = ?", array($praxe->groupingid));
         $aPart = array();
     	foreach($groups as $group) {
     		$aPart[] = '<a href="'.$CFG->wwwroot.'/user/index.php?id='.$course->id.'&amp;group='.$group->id.'">'.$group->name.'</a>';

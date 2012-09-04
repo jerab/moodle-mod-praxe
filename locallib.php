@@ -168,33 +168,41 @@ function praxe_get_locations($isced = 0, $studyfield = null, $active = null, $bO
 				LEFT JOIN {user} teacher ON (teacher.id = ext_teacher)
 				LEFT JOIN {praxe_studyfields} studyf ON (studyf.id = studyfield)";
 	$where = array();
+	$params = array();
 	/// location for a specifit isced level ///
 	if($bOnlyActual) {
-		$where[] = "loc.year = ".praxe_record::getData('year');
-		$where[] = "loc.term = ".praxe_record::getData('term');
-		$where[] = "loc.studyfield = ".praxe_record::getData('studyfield');
+		$where[] = "loc.year = ?";
+		$params[] = praxe_record::getData('year');
+		$where[] = "loc.term = ?";
+		$params[] = praxe_record::getData('term');
+		$where[] = "loc.studyfield = ?";
+		$params[] = praxe_record::getData('studyfield');
 		if(praxe_record::getData('isced') > 0) {
-			$where[] = "loc.isced = ".praxe_record::getData('isced');
+			$where[] = "loc.isced = ?";
+			$params[] = praxe_record::getData('isced');
 		}
 	}else {
 		if($isced > 0) {
-			$where[] = "isced = ".(int)$isced;
+			$where[] = "isced = ?";
+			$params[] = praxe_record::getData('studyfield');
 		}
 		if(!is_null($studyfield)) {
-			$where[] = "studyfield = ".(int)$studyfield;
+			$where[] = "studyfield = ?";
+			$params[] = (int)$studyfield;
 		}
 		if(!is_null($active)) {
 			$where[] = ($active) ? 'active = 1' : 'active = 0';
 		}
 		if($year) {
-		    $where[] = 'loc.year = '.(int)$year;
+		    $where[] = 'loc.year = ?';
+		    $params[] = (int)$year;
 		}
 	}
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
 	}
-	//print_object($sql);
-	return $DB->get_records_sql($sql);
+
+	return count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql);
 }
 function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOnlyActual = 0, $year = 0) {
 	global $CFG, $DB;
@@ -209,29 +217,37 @@ function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOn
 				LEFT JOIN {user} teacher ON (teacher.id = ext_teacher)
 				LEFT JOIN {praxe_studyfields} studyf ON (studyf.id = studyfield)";
 	$where = array();
+	$params = array();
 	if(!is_null($schoolid)) {
-		$where[] = "school = ".(int)$schoolid;
+		$where[] = "school = ?";
+		$params[] = (int)$schoolid;
 	}
 	if(!is_null($headm)) {
-		$where[] = "headmaster = ".(int)$headm;
+		$where[] = "headmaster = ";
+		$params[] = (int)$headm;
 	}
 	if($bOnlyActual != 0) {
-		$where[] = "loc.year = ".praxe_record::getData('year');
-		$where[] = "loc.term = ".praxe_record::getData('term');
-		$where[] = "loc.studyfield = ".praxe_record::getData('studyfield');
+		$where[] = "loc.year = ?";
+		$where[] = "loc.term = ?";
+		$where[] = "loc.studyfield = ?";
+		$params[] = praxe_record::getData('year');
+		$params[] = praxe_record::getData('term');
+		$params[] = praxe_record::getData('studyfield');
 		if(praxe_record::getData('isced') > 0) {
-			$where[] = "loc.isced = ".praxe_record::getData('isced');
+			$where[] = "loc.isced = ?";
+			$params[] = praxe_record::getData('isced');
 		}
 	}else {
 	    if($year) {
-	        $where[] = "loc.year = ".(int)$year;
+	        $where[] = "loc.year = ?";
+	        $params[] = (int)$year;
 	    }
 	}
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
 	}
-	//print_object($sql);
-	return $DB->get_records_sql($sql);
+
+	return count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql);
 }
 /**
  * Return result of get_record_sql. Includes data of headmaster, external teacher and school.
@@ -248,11 +264,13 @@ function praxe_get_location($id, $teacherid = null) {
 				LEFT JOIN {user} head ON (head.id = school.headmaster)
 				LEFT JOIN {praxe_school_teachers} ext ON (ext.id = loc.teacher)
 				LEFT JOIN {user} teacher ON (teacher.id = ext_teacher)
-				WHERE loc.id = $id";
+				WHERE loc.id = ?";
+	$params = array($id);
 	if(!is_null($teacherid)) {
-		$sql .= " AND teacher.id = ".(int)$teacherid;
+		$sql .= " AND teacher.id = ?";
+		$params[] = (int)$teacherid;
 	}
-	return $DB->get_record_sql($sql);
+	return $DB->get_record_sql($sql, $params);
 }
 function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	global $cm, $course, $CFG, $DB;
@@ -263,14 +281,20 @@ function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
 	$sql = "SELECT rec.location, rec.*
 				FROM {praxe_records} rec
 				INNER join {praxe} praxe ON (praxe = praxe.id)
-				WHERE year = ".date('Y',time())." AND term = ".praxe_record::getData('term')."
-				AND studyfield = ".praxe_record::getData('studyfield')."
-				AND (status <> ".PRAXE_STATUS_REFUSED." OR student = ".$user.")";
+				WHERE year = ? AND term = ?
+				AND studyfield = ? AND (status <> ? OR student = ?)";
 	/// selection of location with specific isced level ///
+	$params = array(date('Y',time()),
+	                praxe_record::getData('term'),
+	                praxe_record::getData('studyfield'),
+	                PRAXE_STATUS_REFUSED,
+	                $user
+	            );
 	if($isced > 0) {
-		$sql .= "AND isced = ".praxe_record::getData('isced');
+		$sql .= "AND isced = ?";
+		$params[] = praxe_record::getData('isced');
 	}
-	if(!is_array($used = $DB->get_records_sql($sql))) {
+	if(!is_array($used = $DB->get_records_sql($sql, $params))) {
 		return $all;
 	}
 	$result = array_diff_key($all, $used);
@@ -300,14 +324,18 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 			LEFT JOIN {praxe_school_teachers} ext ON(teacher = ext.id)
 			LEFT JOIN {user} teacher ON(ext_teacher = teacher.id)";
 	$where = array();
+	$params = array();
 	if(!is_null($praxeid)) {
-		$where[] = "praxe = $praxeid";
+		$where[] = "praxe = ?";
+		$params[] = $praxeid;
 	}
 	if(!is_null($teacherid)){
-		$where[] = "teacher.id = $teacherid";
+		$where[] = "teacher.id = ?";
+		$params[] = $teacherid;
 	}
 	if(!is_null($studentid)){
-		$where[] = "rec.student = $studentid";
+		$where[] = "rec.student = ?";
+		$params[] = $studentid;
 	}
 	if(count($where)) {
 		$sql .= ' WHERE '.implode(' AND ',$where);
@@ -319,18 +347,18 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 	}
 	$sql .= " order by $order";
 
-	$records = $DB->get_records_sql($sql);
+	$records = count($params) ? $DB->get_records_sql($sql, $params) : $DB->get_records_sql($sql);
 
 	if($bInspect) {
 		foreach($records as $rec) {
 	        /// schedule is already done and confirmed ///
 	        if($rec->status >= PRAXE_STATUS_SCHEDULE_DONE) {
-	            $sql = "SELECT insp.id, sch.timestart, user.id as userid,user.firstname,user.lastname
+	            $sql = "SELECT insp.id, sch.timestart, userinsp.id as userid,userinsp.firstname,userinsp.lastname
 	            		FROM {praxe_schedules} sch
 	            		JOIN {praxe_schedule_inspections} insp ON(insp.schedule = sch.id)
-	            		JOIN {user} user ON(user.id = insp.inspector)
-	            		WHERE sch.record = {$rec->id} AND sch.deleted IS NULL";
-	            $rec->inspections = $DB->get_records_sql($sql);
+	            		JOIN {user} userinsp ON(userinsp.id = insp.inspector)
+	            		WHERE sch.record = ? AND sch.deleted IS NULL";
+	            $rec->inspections = $DB->get_records_sql($sql, array($rec->id));
 	        }else {
 	            $rec->inspections = array();
 	        }
@@ -355,21 +383,25 @@ function praxe_get_schools($headmst = null, $teacher = null, $location = null) {
 			LEFT JOIN {user} teacher ON(ext_teacher = teacher.id)
 			LEFT JOIN {praxe_locations} loc ON(loc.school = school.id)";
 	$where = array();
+	$params = array();
 	if(!is_null($headmst)){
-		$where[] = "headmaster = $headmst";
+		$where[] = "headmaster = ?";
+		$params[] = $headmst;
 	}
 	if(!is_null($teacher)){
-		$where[] = "teacher.id = $teacher";
+		$where[] = "teacher.id = ?";
+		$params[] = $teacher;
 	}
 	if(!is_null($location)){
-		$where[] = "loc.id = $location";
+		$where[] = "loc.id = ?";
+		$params[] = $location;
 	}
 	if(count($where)) {
 		$sql .= ' WHERE '.implode(' AND ',$where);
 	}
 	$sql .= ' GROUP BY school.id, school.name, school.type, school.street, school.city, school.zip, school.email, school.phone, school.website, school.headmaster, school.usermodified, school.timecreated, school.timemodified, headm.firstname, headm.lastname';
 	$sql .= ' ORDER BY name';
-	return $DB->get_records_sql($sql);
+	return (count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql));
 }
 function praxe_get_ext_teachers_at_school($headm = null, $schoolid = null) {
 	global $CFG, $DB;
@@ -382,18 +414,21 @@ function praxe_get_ext_teachers_at_school($headm = null, $schoolid = null) {
 			LEFT JOIN {user} head ON (headmaster = head.id)
 			LEFT JOIN {user} teacher ON (ext_teacher = teacher.id)";
 	$where = array();
+	$params = array();
 	if(!is_null($headm)){
-		$where[] = "headmaster = ".(int)$headm;
+		$where[] = "headmaster = ?";
+		$params[] = $headm;
 	}
 	if(!is_null($schoolid)) {
-		$where[] = "school.id = ".(int)$schoolid;
+		$where[] = "school.id = ?";
+		$params[] = $schoolid;
 	}
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
 	}
 	$sql .= " ORDER BY school.name, lastname, firstname";
-	//print_object($sql);
-	return $DB->get_records_sql($sql);
+
+	return (count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql));
 }
 function praxe_get_record($recordid) {
 	global $CFG, $DB;
@@ -405,8 +440,8 @@ function praxe_get_record($recordid) {
 			LEFT JOIN {praxe_locations} loc ON(location = loc.id)
 			LEFT JOIN {praxe_schools} school ON(school = school.id)
 			LEFT JOIN {praxe_school_teachers} ext ON(teacher = ext.id)
-			LEFT JOIN {user} teacher ON(teacher.id = ext_teacher) WHERE rec.id = {$recordid}";
-	return $DB->get_record_sql($sql);
+			LEFT JOIN {user} teacher ON(teacher.id = ext_teacher) WHERE rec.id = ?";
+	return $DB->get_record_sql($sql, array($recordid));
 }
 function praxe_get_schedule($schid) {
 	global $CFG, $DB;
@@ -415,8 +450,8 @@ function praxe_get_schedule($schid) {
 			LEFT JOIN {praxe_records} rec ON(rec.id = sch.record)
 			LEFT JOIN {praxe_schedule_inspections} schins ON(schedule = sch.id)
 			LEFT JOIN {user} inspect ON(inspect.id = inspector)
-			WHERE sch.id = $schid";
-	$ret = $DB->get_records_sql($sql);
+			WHERE sch.id = ?";
+	$ret = $DB->get_records_sql($sql, array($schid));
 	if(!is_array($ret)) {
 		return $ret;
 	}
@@ -448,7 +483,7 @@ function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 			LEFT JOIN {praxe_records} rec ON(rec.id = sch.record)
 			LEFT JOIN {praxe_schedule_inspections} schins ON(schedule = sch.id)
 			LEFT JOIN {user} inspect ON(inspect.id = inspector)
-			WHERE record=$recid";
+			WHERE record = ?";
 	if(!$incDeleted) {
 		$sql .= " AND sch.deleted IS NULL";
 	}
@@ -456,7 +491,7 @@ function praxe_get_schedules($recid, $order = null, $incDeleted = false) {
 		$order = array('timestart', 'timeend');
 	}
 	$sql .= " ORDER BY ".implode(', ',$order);
-	$ret = $DB->get_records_sql($sql);
+	$ret = $DB->get_records_sql($sql, array($recid));
 	if(!$ret) {
 		return $ret;
 	}
@@ -490,8 +525,8 @@ function praxe_get_school($schoolid) {
 			LEFT JOIN {user} head ON (headmaster = head.id)
 			LEFT JOIN {praxe_school_teachers} ext_teach ON (school.id = teacher_school)
 			LEFT JOIN {user} teacher ON (ext_teacher = teacher.id)
-			WHERE school.id = {$schoolid}";
-	$res = $DB->get_recordset_sql($sql);
+			WHERE school.id = ?";
+	$res = $DB->get_recordset_sql($sql, array($schoolid));
 
 	foreach($res as $id=>$sch) {
 		if(!isset($result)) {
@@ -533,9 +568,8 @@ function praxe_get_cohort_members($cidnumber) {
               FROM {cohort} c
               JOIN {cohort_members} cm ON cm.cohortid = c.id
               JOIN {user} u ON u.id = cm.userid
-             WHERE c.idnumber = '{$cidnumber}'
-          ORDER BY u.lastname, u.firstname";
-    $members = $DB->get_records_sql($sql);
+             WHERE c.idnumber = ? ORDER BY u.lastname, u.firstname";
+    $members = $DB->get_records_sql($sql, array($cidnumber));
     return ($members) ? $members : array();
 }
 
@@ -588,20 +622,22 @@ function praxe_get_stud_record($userid) {
 			LEFT JOIN {praxe_records} rec ON(student = stud.id)
 			LEFT JOIN {praxe_locations} loc ON(location = loc.id)
 			LEFT JOIN {praxe_schools} school ON(school = school.id)
-			WHERE user.id = '{$userid}'";
-	return $DB->get_record_sql($sql);
+			WHERE stud.id = ?";
+	return $DB->get_record_sql($sql, array($userid));
 }
 
 function praxe_get_use_status_of_location($locid, $year=null) {
 	global $CFG, $DB;
 	$sql = "SELECT rec.*, stud.firstname, stud.lastname
 			FROM {praxe_records} rec
-			LEFT JOIN {user} stud ON(student = stud.id) WHERE";
-	$where = " rec.location = ".$locid;
+			LEFT JOIN {user} stud ON(student = stud.id)
+	        WHERE rec.location = ?";
+	$params = array($locid);
 	if(!is_null($year)) {
-		$where .= ' AND year = '.(int)$year;
+		$sql .= ' AND year = ?';
+		$params[] = $year;
 	}
-	if($ret = $DB->get_record_sql($sql.$where)){
+	if($ret = $DB->get_record_sql($sql, $params)){
 	    if($ret->status == PRAXE_STATUS_REFUSED) {
 			return praxe_get_status_info($ret->status).' '.get_string('available_location','praxe');
 		}else{
@@ -655,31 +691,38 @@ function praxe_get_years_for_filter($active = null, $school = null, $bOnlyActual
 				LEFT JOIN {praxe_schools} school ON (school = school.id)
 				LEFT JOIN {praxe_school_teachers} ext ON (ext.id = loc.teacher)";
 	$where = array();
-
+    $placeholds = array();
 	if($teacher) {
-	    $where[] = "ext_teacher = ".(int)$teacher;
+	    $where[] = "ext_teacher = ?";
+	    $placeholds[] = (int)$teacher;
 	}
     if($headm) {
-	    $where[] = "headmaster = ".(int)$headm;
+	    $where[] = "headmaster = ?";
+	    $placeholds[] = (int)$headm;
 	}
     if($active) {
 		$where[] = ($active) ? 'active = 1' : 'active = 0';
 	}
     if($school) {
-		$where[] = 'loc.school = '.(int)$school;
+		$where[] = 'loc.school = ?';
+		$placeholds[] = (int)$school;
 	}
 	if($bOnlyActual) {
-		$where[] = "loc.year = ".praxe_record::getData('year');
-		$where[] = "loc.term = ".praxe_record::getData('term');
-		$where[] = "loc.studyfield = ".praxe_record::getData('studyfield');
+		$where[] = "loc.year = ?";
+		$placeholds[] = praxe_record::getData('year');
+		$where[] = "loc.term = ?";
+		$placeholds[] = praxe_record::getData('term');
+		$where[] = "loc.studyfield = ?";
+		$placeholds[] = praxe_record::getData('studyfield');
 		if(praxe_record::getData('isced') > 0) {
-			$where[] = "loc.isced = ".praxe_record::getData('isced');
+			$where[] = "loc.isced = ?";
+			$placeholds[] = praxe_record::getData('isced');
 		}
 	}
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
 	}
-	return $DB->get_records_sql($sql);
+	return $DB->get_records_sql($sql, $placeholds);
 }
 
 /**
@@ -697,9 +740,9 @@ function praxe_is_user_in_cohort($userid, $cidnumber) {
     $sql = "SELECT cm.userid
               FROM {cohort} c
               JOIN {cohort_members} cm ON cm.cohortid = c.id
-             WHERE c.idnumber = '{$cidnumber}' AND cm.userid = {$userid}";
+             WHERE c.idnumber = ? AND cm.userid = ?";
 
-    return (bool)$DB->get_record_sql($sql);
+    return (bool)$DB->get_record_sql($sql, array($cidnumber, $userid));
 }
 
 function praxe_print_tab_footer() {
