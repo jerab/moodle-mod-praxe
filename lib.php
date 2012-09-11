@@ -231,6 +231,7 @@ function praxe_get_instance($course, $isced='', $studyfield='') {
 function praxe_supports($feature) {
     switch($feature) {
         //case FEATURE_BACKUP_MOODLE2:          return true;
+        case FEATURE_GROUPINGS:    return true;
 
         default: return null;
     }
