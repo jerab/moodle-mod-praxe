@@ -98,7 +98,7 @@ class praxe_view_editteacher extends praxe_view {
 	}
 	public function show_all_students_records() {
 		global $CFG;
-		if($records = praxe_get_praxe_records(praxe_record::getData('id'),null,null,null,true)) {
+		if($records = praxe_get_praxe_records(praxe_record::getData('id'),null,null,null,true,false)) {
 			require_once($CFG->dirroot . '/mod/praxe/view_extteacher.php');
 			$this->content .= praxe_view_extteacher::show_records($records);
 		}else {

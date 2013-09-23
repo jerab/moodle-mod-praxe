@@ -12,6 +12,7 @@ $string['address'] = 'Adresa';
 $string['addschool'] = 'Vytvořit školu';
 $string['addtoschedule'] = 'Přidat záznam do rozvrhu';
 $string['already_used'] = 'Využívané';
+$string['assignstudtolocation_text'] = 'Přiřaďte studenta k nabídce praxe (student a fakultní učitel budou informováni e-mailem).';
 $string['assigned_to_inspection'] = 'Přiřazen k rozvrhu na hospitaci';
 $string['assigned_to_location'] = 'Přiřazen k dané nabídce';
 $string['assignteachers'] = 'Přiřadit učitele ke škole';
@@ -22,7 +23,14 @@ $string['assigntolocation_mail'] = 'Dobrý den,'.
 									"\n\n".'Mnohokrát děkujeme.'.
 									"\n\n".'S pozdravem'.
 									"\n".'Organizátoři pedagogické praxe';
+$string['assigntolocation_mail_student'] = 'Dobrý den,'.
+		"\n".'dovolte nám oznámit Vám, že jste byl(a) přiřazen(a) ke škole {$a->school} za účelem konání své praxe ze svého studijního předmětu {$a->studyfield}.'.
+		"\n".'Tato praxe by měla probíhat v období {$a->date}.'.
+		"\n".'Podrobnosti naleznete v Moodle (viz odkaz níže) kurzu nebo se informujte u svého vedoucího praxe.'.
+		"\n\n".'S pozdravem'.
+		"\n".'Organizátoři pedagogické praxe';
 $string['assigntolocation_text_forstudents'] = 'Vyberte jednu z níže vypsaných volných nabídek.';
+$string['assignusertolocation'] = 'Přiřadit studenta';
 $string['available_location'] = 'K dispozici';
 $string['changelocation'] = 'Změnit školu';
 $string['choose_lesson_number_info'] = 'Vyberte číslo hodiny! Je důležité pro správné zobrazení rozvrhu.';
@@ -71,8 +79,11 @@ $string['location_added'] = 'Nabídka byla vytvořena';
 $string['location_no_available'] = 'Tato nabídka již není dostupná';
 $string['location_updated'] = 'Nabídka byla upravena';
 $string['locationisrequired'] = 'Je nutné vybrat jednu z nabídek';
+$string['location_is_not_available'] = 'Tato nabídka je již využívaná.';
+$string['location'] = 'Nabídka praxe';
 $string['locations'] = 'Nabídky praxí';
-$string['mailnotsenttoexternalteacher'] = 'Nepodařilo se odeslat informace fakultnímu učiteli';
+$string['mailnotsenttoexternalteacher'] = 'Nepodařilo se odeslat informace fakultnímu učiteli!';
+$string['mailnotsenttostudent'] = 'Nepodařilo se odeslat e-mail studentovi!';
 $string['modulename'] = 'Praxe';
 $string['modulenameplural'] = 'Praxe';
 $string['my_locations'] = 'Mé nabídky';
@@ -91,6 +102,7 @@ $string['no_teachers_for_this_school'] = 'Pro danou školu neexistují žádní 
 $string['nolocationsavailable'] = 'Nejsou dostupné žádné nabídky';
 $string['noschoolsavailable'] = 'Žádná škola k dispozici';
 $string['noselection'] = 'Bez výběru';
+$string['nostudentsavailable'] = 'Nejsou dostupní žádní uživatelé, kteří by mohli být přiřazeni k této nabídce praxe.';
 $string['notallowedaction'] = 'Pro tuto činnost nemáte oprávnění';
 $string['numberofrecords'] = 'Počet záznamů';
 $string['only_actual'] = 'Aktuální';
@@ -104,6 +116,7 @@ $string['praxe:addnoticetostudentschedule'] = 'Přidat poznámku do rozvrhu stud
 $string['praxe:addschool'] = 'Přidat školu';
 $string['praxe:addstudentschedule'] = 'Přidat rozvrh studenta';
 $string['praxe:assignselftoinspection'] = 'Zapsat se do rozvrhu studenta jako inspektor';
+$string['praxe:assignstudenttolocation'] = 'Přiřadit uživatele k nabídce praxe';
 $string['praxe:assignteachertoanyschool'] = 'Přiřadit uživatele ke škole jako fakultního učitele dané školy';
 $string['praxe:assignteachertoownschool'] = 'Přiřadit uživatele ke své(Headmaster) škole jako fakultního učitele';
 $string['praxe:beexternalteacher'] = 'Umožnit být fakultním učitelem';
@@ -143,6 +156,7 @@ $string['schoolname'] = 'Název školy';
 $string['schoolroom'] = 'Místnost';
 $string['schools'] = 'Školy';
 $string['schooltype'] = 'Typ školy';
+$string['select_student'] = '- vyber studenta -';
 $string['sendinfotoextteacher'] = 'Zaslat informaci fakultnímu učiteli';
 $string['status'] = 'Stav';
 $string['status_assigned_text'] = 'Čeká se na potvrzení přijetí fakultním učitelem.';

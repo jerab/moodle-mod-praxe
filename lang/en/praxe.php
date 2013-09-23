@@ -26,6 +26,7 @@ $string['address'] = 'Address';
 $string['addschool'] = 'Add new school';
 $string['addtoschedule'] = 'Add item to schedule';
 $string['already_used'] = 'Already used';
+$string['assignstudtolocation_text'] = 'Assign student to location (student and external teacher will be informed by e-mail).';
 $string['assignteachers'] = 'Assign teachers to school';
 $string['assigntolocation_mail'] = 'Dear Sir or Madam,'.
 									"\n".'our pleasure to inform you that the student {$a->name} has choosen your subject {$a->subject} at your school {$a->school} to conduct his/her practice from the course of study {$a->studyfield}.'.
@@ -34,9 +35,18 @@ $string['assigntolocation_mail'] = 'Dear Sir or Madam,'.
 									"\n\n".'Thank you very much.'.
 									"\n\n".'Sincerely,'.
 									"\n".'Organizers of educational practice';
+
+$string['assigntolocation_mail_student'] = 'Dear {$a->name},'.
+		"\n".'our pleasure to inform you have been assigned to the school {$a->school} to conduct your practice from the course of study {$a->studyfield}.'.
+		"\n".'This practice should take place between {$a->date}.'.
+		"\n".'Please, wait for confirmation of the acceptance of your practice.'.
+		"\n\n".'Sincerely,'.
+		"\n".'Organizers of educational practice';
+
 $string['assigntolocation_text_forstudents'] = 'Choose one of the available locations shown below.';
 $string['assigned_to_inspection'] = 'Assigned to an inspection';
 $string['assigned_to_location'] = 'Assigned to location';
+$string['assignusertolocation'] = 'Assign student to location';
 $string['available_location'] = 'Available_location';
 $string['changelocation'] = 'Change location';
 $string['choose_lesson_number_info'] = 'Choose the number of lesson! It&apos;s important for the correct schedule.';
@@ -84,8 +94,11 @@ $string['location_added'] = 'New location has been created';
 $string['location_no_available'] = 'This location is not available';
 $string['location_updated'] = 'The location has been updated';
 $string['locationisrequired'] = 'Location is required';
+$string['location'] = 'Location';
+$string['location_is_not_available'] = 'This location is already used by some student.';
 $string['locations'] = 'Locations';
-$string['mailnotsenttoexternalteacher'] = 'E-mail has not been sent to external teacher';
+$string['mailnotsenttoexternalteacher'] = 'E-mail has not been sent to external teacher!';
+$string['mailnotsenttostudent'] = 'E-mail has not been sent to student!';
 $string['modulename'] = 'Praxe';
 $string['modulenameplural'] = 'Praxes';
 $string['my_locations'] = 'My locations';
@@ -104,6 +117,7 @@ $string['no_teachers_for_this_school'] = 'No teachers available for this school.
 $string['nolocationsavailable'] = 'No locations available';
 $string['noschoolsavailable'] = 'No schools available';
 $string['noselection'] = 'Without selection';
+$string['nostudentsavailable'] = 'No available students in course to be assigned to this location.';
 $string['notallowedaction'] = 'Not allowed action';
 $string['numberofrecords'] = 'Number of records';
 $string['only_actual'] = 'Actual';
@@ -119,6 +133,8 @@ $string['praxe:addnoticetostudentschedule'] = 'Add notice to the student&apos;s 
 $string['praxe:addschool'] = 'Add new school';
 $string['praxe:addstudentschedule'] = 'Add student&apos;s schedule';
 $string['praxe:assignselftoinspection'] = 'Assign self to schedule as an inspector';
+$string['praxe:assignstudenttolocation'] = 'Assign user(student) to available location';
+$string['praxe:assignteachertolocation'] = 'Assign external teacher to location';
 $string['praxe:assignteachertoanyschool'] = 'Assign teacher user to any school';
 $string['praxe:assignteachertoownschool'] = 'Assing teacher user to own school';
 $string['praxe:beexternalteacher'] = 'Allow user to be assigned to the school as an external teacher';
@@ -159,6 +175,7 @@ $string['schoolname'] = 'School name';
 $string['schoolroom'] = 'School room';
 $string['schools'] = 'Schools';
 $string['schooltype'] = 'School type';
+$string['select_student'] = '- select student -';
 $string['sendinfotoextteacher'] = 'Inform External teacher by mail';
 $string['status'] = 'Status';
 $string['status_assigned_text'] = 'Waiting for the external teacher confirmation.';
@@ -198,6 +215,4 @@ $string['you_confirmed_location'] = 'You has confirmed the student&apos;s reques
 $string['you_refused_location'] = 'You has refused the student&apos;s request.';
 $string['you_should_create_schedule'] = 'Now you should create your schedule';
 $string['zipcode'] = 'Zip code';
-
-
 ?>

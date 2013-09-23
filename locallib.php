@@ -44,6 +44,8 @@ define('PRAXE_TAB_EDITTEACHER_ASSIGNTEACHERS',5);
 define('PRAXE_TAB_EDITTEACHER_EDITSCHOOL',6);
 define('PRAXE_TAB_EDITTEACHER_LOCATIONS',7);
 define('PRAXE_TAB_EDITTEACHER_ADDLOCATION',8);
+define('PRAXE_TAB_EDITTEACHER_ASSIGNSTUDTOLOCATION',9);
+
 
 define('PRAXE_TAB_EXTTEACHER_HOME',0);
 define('PRAXE_TAB_EXTTEACHER_MYLOCATIONS',1);
@@ -312,7 +314,7 @@ function praxe_get_available_locations($user, $isced = 0, $studyfield = null) {
  *
  * @return array
  */
-function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = null, $studentid = null, $bInspect = false) {
+function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = null, $studentid = null, $bInspect = false, $bIncludeRefused = true) {
 	global $CFG,$DB;
 	$sql = "SELECT rec.*, loc.subject, loc.id as locid, school.name as schoolname, school.id as schoolid,
 			stud.firstname, stud.lastname, stud.id as userid, ext.id as extteacherid,
@@ -337,6 +339,11 @@ function praxe_get_praxe_records($praxeid = null, $order = null, $teacherid = nu
 		$where[] = "rec.student = ?";
 		$params[] = $studentid;
 	}
+	if(!$bIncludeRefused) {
+		$where[] = "rec.status != ?";
+		$params[] = PRAXE_STATUS_REFUSED;
+	}
+
 	if(count($where)) {
 		$sql .= ' WHERE '.implode(' AND ',$where);
 	}
@@ -551,11 +558,19 @@ function praxe_get_school($schoolid) {
 		return false;
 	}
 }
-function praxe_get_base_url($params = array()) {
+/**
+ * @param array $params [optional]
+ * @param $notViewPage [optional] - name of php scritp in root of module
+ */
+function praxe_get_base_url($params = array(), $notViewPage = null) {
 	global $cm;
 	(array)($params);
 	$params = array_merge(array('id'=>$cm->id),$params);
-	return new moodle_url("/mod/praxe/view.php",$params);
+	if(is_null($notViewPage)) {
+		return new moodle_url("/mod/praxe/view.php",$params);
+	}else {
+		return new moodle_url("/mod/praxe/".$notViewPage.".php",$params);
+	}
 }
 
 /**
@@ -628,17 +643,20 @@ function praxe_get_stud_record($userid) {
 
 function praxe_get_use_status_of_location($locid, $year=null) {
 	global $CFG, $DB;
-	$sql = "SELECT rec.*, stud.firstname, stud.lastname
-			FROM {praxe_records} rec
-			LEFT JOIN {user} stud ON(student = stud.id)
-	        WHERE rec.location = ?";
+	$where = "WHERE rec.location = ?";
 	$params = array($locid);
 	if(!is_null($year)) {
 		$sql .= ' AND year = ?';
 		$params[] = $year;
 	}
+	$sql = "SELECT rec.*, stud.firstname, stud.lastname
+			FROM {praxe_records} rec
+			LEFT JOIN {user} stud ON(student = stud.id)
+	        $where
+			ORDER BY timemodified DESC
+			LIMIT 1";
 	if($ret = $DB->get_record_sql($sql, $params)){
-	    if($ret->status == PRAXE_STATUS_REFUSED) {
+		if($ret->status == PRAXE_STATUS_REFUSED) {
 			return praxe_get_status_info($ret->status).' '.get_string('available_location','praxe');
 		}else{
 		    return praxe_get_status_info($ret->status);

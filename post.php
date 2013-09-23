@@ -47,24 +47,33 @@
 
 				break;
             case ('assigntolocation'): /// assigning student to location
-				/// no access / no id of student to assign ///
-				if(has_capability('mod/praxe:editownrecord',$context)) {
+				if(has_capability('mod/praxe:assignstudenttolocation', $context)) {
+					$post->student = optional_param('student', 0, PARAM_INT);
+					$bInformStudent = true;
+				}else if(has_capability('mod/praxe:editownrecord',$context)) {
 					$post->student = $USER->id;
 				}else if(has_capability('mod/praxe:editanyrecord',$context)) {
 					$post->student = optional_param('student', 0, PARAM_INT);
 				}
+
+				/// check location data ///
+				if(is_null($post->location = optional_param('location', null, PARAM_INT)) ) {
+					print_error('notallowedaction', 'praxe', praxe_get_base_url());
+				}
+				if(!$location = praxe_get_location($post->location)) {
+					print_error('notallowedaction', 'praxe', praxe_get_base_url());
+				}
+
+				/// no access / no id of student to assign ///
 				if(!$post->student) {
-					print_error('notallowedaction', 'praxe');
+					if($bInformStudent) {
+						print_error('notallowedaction', 'praxe', praxe_get_base_url(array('mode'=>'locations','assignuser'=>1,'edit'=>true,'locationid'=>$post->location), 'assigntolocation'));
+					}else {
+						print_error('notallowedaction', 'praxe', praxe_get_base_url());
+					}
 				}
 
 				$post->praxe = $praxe;
-				/// check location data ///
-				if(is_null($post->location = optional_param('location', null, PARAM_INT)) ) {
-					print_error('notallowedaction', 'praxe');
-				}
-				if(!$location = praxe_get_location($post->location)) {
-					print_error('notallowedaction', 'praxe');
-				}
 
 				/// this location is already used by other student ///
 				if($rec = $DB->get_record('praxe_records', array('location' => $location->id, 'praxe' => praxe_record::getData('id')))) {
@@ -80,6 +89,7 @@
 				$id = false;
 				$id = $DB->insert_record('praxe_records', $post);
 				if($id) {
+					$errMail = false;
 					/// sending mail to external teacher ///
 					if(!is_null($location->teacherid)) {
 					    $emuser = get_complete_user_data('id',$location->teacherid);
@@ -97,14 +107,33 @@
 						$emtext = get_string('assigntolocation_mail','praxe',$stud);
 						$mail->setPlain($emtext);
 						$mail->setHtml($emtext);
-						if($mail->mailToUser($emuser, $emfrom)) {
-							redirect(praxe_get_base_url(), get_string('assigned_to_location','praxe'));
+						if(!$mail->mailToUser($emuser, $emfrom)) {
+							print_error('mailnotsenttoexternalteacher', 'praxe', praxe_get_base_url(array('schoolid'=>0, 'mode'=>'locations')));
 						}
-
 					}
-					$msg = "<div>".get_string('mailnotsenttoexternalteacher','praxe')."</div>";
-					$msg .= "<div>".get_string('contactselectedschool','praxe')."</div>";
-					print_error($msg, praxe_get_base_url());
+					/// sending mail to student (from actual user) ///
+					if(isset($bInformStudent)) {
+						global $USER;
+						$emuser = get_complete_user_data('id',$post->student);
+						$emfrom = get_complete_user_data('id',$USER->id);
+						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
+						$mail = new praxe_mailing();
+						$stud = new stdClass();
+						$stud->name = fullname($emuser);
+						$stud->date = userdate(praxe_record::getData('datestart'), get_string('strftimedateshort'))." - ".userdate(praxe_record::getData('dateend'), get_string('strftimedateshort'));
+						$stud->subject = s($location->subject);
+						$stud->school = s($location->name);
+						$stud->studyfield = s(praxe_record::getData('studyfield_name'));
+						$mail->setSubject(get_string('studenttopraxe','praxe'));
+						$mail->addLinkToFoot(praxe_get_base_url(), get_string('praxe','praxe'));
+						$emtext = get_string('assigntolocation_mail_student','praxe',$stud);
+						$mail->setPlain($emtext);
+						$mail->setHtml($emtext);
+						if(!$mail->mailToUser($emuser, $emfrom)) {
+							print_error('mailnotsenttostudent', 'praxe', praxe_get_base_url(array('schoolid'=>0, 'mode'=>'locations')));
+						}
+					}
+					redirect(praxe_get_base_url(array('schoolid'=>0, 'mode'=>'locations')), get_string('assigned_to_location','praxe'));
 				}
 
 				break;
@@ -192,7 +221,7 @@
 						print_error('notallowedaction', 'praxe');
 					}
 				}
-				$redurl = optional_param('redurl',praxe_get_base_url(),PARAM_URL);
+				$redurl = optional_param('redurl',praxe_get_base_url(array('mode'=>'locations','schoolid'=>0)),PARAM_URL);
 				/// insert record ///
 				if(is_null($edit)) {
 					$post->timecreated = time();

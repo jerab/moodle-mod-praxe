@@ -81,12 +81,13 @@ class praxe_view_headm extends praxe_view {
 		$this->form = new praxe_addlocation();
 	}
 	public static function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0, $year = 0) {
-		global $USER, $cm, $OUTPUT;
+		global $USER, $cm, $OUTPUT, $DB;
 		$schoolid = ($schoolid) ? $schoolid : null;
 		$locs = praxe_get_locations_by_schooldata($schoolid, $headmid, $bOnlyActual, $year);
 		if(!$locs) {
 			return get_string('nolocationsavailable','praxe');
 		}
+		$defEnableAssignStudent = praxe_has_capability('assignstudenttolocation');
 
 		$table = new html_table();
 		$h = array();
@@ -123,12 +124,36 @@ class praxe_view_headm extends praxe_view {
 								praxe_get_term_text($loc->term),
 								$status,
 								$active);
-			if($editable) {
-				$params = array('locationid'=>$loc->id);
+
+			/// icon for assign student ///
+			$sql = "SELECT * FROM {praxe_records}
+					WHERE location = ?
+					ORDER BY timemodified DESC
+					LIMIT 1";
+			$params = array($loc->id);
+			if($ret = $DB->get_record_sql($sql, $params)){
+				$enableAssignStudent = ($defEnableAssignStudent && $ret->status == PRAXE_STATUS_REFUSED);
+			}else {
+				$enableAssignStudent = $defEnableAssignStudent;
+			}
+
+			if($editable || $enableAssignStudent) {
+				$editRow = array();
+				$params = array('locationid' => $loc->id);
 				foreach($editlinkparams as $name=>$val) {
 					$params[s($name)] = s($val);
 				}
-				$row[] = $OUTPUT->action_icon(praxe_get_base_url($params), new pix_icon('t/edit',$stredit));
+
+				if($editable) {
+					$editRow[] = $OUTPUT->action_icon(praxe_get_base_url($params), new pix_icon('t/edit',$stredit));
+				}
+
+				if($enableAssignStudent) {
+					$params['assignuser'] = 1;
+					$editRow[] = $OUTPUT->action_icon(praxe_get_base_url($params,'assigntolocation'), new pix_icon('i/users',get_string('assignusertolocation','praxe')));
+				}
+
+				$row[] = implode(' ', $editRow);
 				if(count($table->head) < count($row)) {
 					$table->head[] = get_string('edit');
 					$table->align[] = 'center';

@@ -160,6 +160,21 @@ function praxe_get_participants($praxeid) {
     return false;
 }
 
+/**
+ * Must return an array of user records (all data) who are participants
+ * for a given instance of praxe. Must include every user involved
+ * in the instance, independient of his role (student, teacher, admin...)
+ * See other modules as example.
+ *
+ * @param int $praxeid ID of an instance of this module
+ * @return mixed boolean/array of students
+ */
+function praxe_get_student_participants($praxeid) {
+	$context = get_context_instance(CONTEXT_MODULE, $praxeid);
+	$users = get_enrolled_users($context, 'mod/praxe:addstudentschedule');
+	return $users;
+}
+
 
 /**
  * This function returns if a scale is being used by one newmodule
