@@ -158,6 +158,7 @@ $string['schools'] = 'Školy';
 $string['schooltype'] = 'Typ školy';
 $string['select_student'] = '- vyber studenta -';
 $string['sendinfotoextteacher'] = 'Zaslat informaci fakultnímu učiteli';
+$string['sendinfotostudent'] = 'Zaslat informaci studentovi';
 $string['status'] = 'Stav';
 $string['status_assigned_text'] = 'Čeká se na potvrzení přijetí fakultním učitelem.';
 $string['status_closed_text'] = 'Tato praxe již byla uzavřena.';

@@ -14,7 +14,7 @@ class praxe_assignstudtolocation extends praxe_actionform {
 	}
     public function definition() {
         $err = false;
-    	global $USER, $cm, $course, $DB;
+    	global $USER, $cm, $course, $DB, $CFG;
         $location = praxe_get_location($this->locationid);
         $users = praxe_get_student_participants($cm->id);
 
@@ -64,7 +64,24 @@ class praxe_assignstudtolocation extends praxe_actionform {
 	    		$select .= '</select>';
 
 	    		$table->data[] = array($info, $select);
-				$cel =  new html_table_cell();
+
+	    		/// option to send emails
+	    		require_once($CFG->dirroot . "/lib/pear/HTML/QuickForm/checkbox.php");
+
+	    		$cel =  new html_table_cell();
+	    		$cel->colspan = 2;
+	    		$check = new HTML_QuickForm_checkbox('sendemailtoextteacher','',get_string('sendinfotoextteacher','praxe'));
+	    		$cel->text = $check->toHtml();
+	    		$table->data[] = new html_table_row(array($cel));
+
+	    		$cel =  new html_table_cell();
+	    		$cel->colspan = 2;
+	    		$check = new HTML_QuickForm_checkbox('sendemailtostudent','',get_string('sendinfotostudent','praxe'),'checked');
+	    		$cel->text = $check->toHtml();
+	    		$table->data[] = new html_table_row(array($cel));
+
+	    		/// action buttons
+	    		$cel =  new html_table_cell();
 				$cel->colspan = 2;
 				$cel->style = 'text-align:center';
 				$cel->text = '<div class="fitem center" style="margin: 10px 0;">'

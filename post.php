@@ -47,12 +47,12 @@
 
 				break;
             case ('assigntolocation'): /// assigning student to location
-				if(has_capability('mod/praxe:assignstudenttolocation', $context)) {
+				if(praxe_has_capability('assignstudenttolocation')) {
 					$post->student = optional_param('student', 0, PARAM_INT);
 					$bInformStudent = true;
-				}else if(has_capability('mod/praxe:editownrecord',$context)) {
+				}else if(praxe_has_capability('editownrecord')) {
 					$post->student = $USER->id;
-				}else if(has_capability('mod/praxe:editanyrecord',$context)) {
+				}else if(praxe_has_capability('editanyrecord')) {
 					$post->student = optional_param('student', 0, PARAM_INT);
 				}
 
@@ -84,14 +84,14 @@
 
 				$post->timecreated = time();
 				$post->timemodified = time();
-				$DB->delete_records('praxe_records', array('praxe' => $praxe, 'student' => $post->student));
+				//$DB->delete_records('praxe_records', array('praxe' => $praxe, 'student' => $post->student));
 
 				$id = false;
 				$id = $DB->insert_record('praxe_records', $post);
 				if($id) {
-					$errMail = false;
+
 					/// sending mail to external teacher ///
-					if(!is_null($location->teacherid)) {
+					if(optional_param('sendemailtoextteacher',0,PARAM_INT) == 1 && !is_null($location->teacherid)) {
 					    $emuser = get_complete_user_data('id',$location->teacherid);
 						$emfrom = get_complete_user_data('id',$post->student);
 						require_once($CFG->dirroot . '/mod/praxe/mailing.php');
@@ -112,7 +112,7 @@
 						}
 					}
 					/// sending mail to student (from actual user) ///
-					if(isset($bInformStudent)) {
+					if(isset($bInformStudent) && optional_param('sendemailtostudent',0,PARAM_INT) == 1) {
 						global $USER;
 						$emuser = get_complete_user_data('id',$post->student);
 						$emfrom = get_complete_user_data('id',$USER->id);
