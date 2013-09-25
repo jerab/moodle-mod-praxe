@@ -372,7 +372,7 @@
    	            $params['mode'] = 'schedule';
    	            break;
 					case 'assigntolocation' :
-						$params['mode'] = $tab_modes[strtolower($viewrole)][constant('PRAXE_TAB_EDITTEACHER_LOCATIONS')];
+						$params['mode'] = 'locations';
 						if(optional_param('detail',0,PARAM_INT) == 1 && ($schoolid = optional_param('schoolid',0,PARAM_INT)) > 0) {
 							$params['schoolid'] = $schoolid;
 						}else {
