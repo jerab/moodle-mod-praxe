@@ -235,7 +235,8 @@ class praxe_view_student extends praxe_view {
 		foreach($schedules as $item) {
 			$row = array(	userdate((int)$item->timestart, get_string('strftimedateshort')),
 							(int)$item->lesnumber.".",
-							date('G:i',(int)$item->timestart) .' - '. date('G:i',(int)$item->timeend),
+							//date('G:i',(int)$item->timestart) .' - '. date('G:i',(int)$item->timeend),
+							userdate((int)$item->timestart, "%I:%M") . ' - ' . userdate((int)$item->timeend, "%I:%M"),
 							praxe_get_yearclass($item->yearclass),
 							s($item->schoolroom),
 							s($item->lessubject),
