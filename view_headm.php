@@ -100,6 +100,7 @@ class praxe_view_headm extends praxe_view {
 		$h[] = get_string('term','praxe');
 		$h[] = get_string('actual_status','praxe');
 		$h[] = get_string('active','praxe');
+		$h[] = get_string('student','praxe');
 		$table->head = $h;
 		$table->align = array ('left', 'left', 'left', 'left', 'left', 'center','center','left','center');
 		$table->data = array();
@@ -125,15 +126,17 @@ class praxe_view_headm extends praxe_view {
 								$status,
 								$active);
 
-			/// icon for assign student ///
-			$sql = "SELECT * FROM {praxe_records}
+			/// icon for assign student / student ///
+			$sql = "SELECT p.*, s.firstname, s.lastname FROM {praxe_records} p LEFT JOIN {user} s ON (s.id = p.student)
 					WHERE location = ?
 					ORDER BY timemodified DESC
 					LIMIT 1";
 			$params = array($loc->id);
 			if($ret = $DB->get_record_sql($sql, $params)){
+				$row[] = praxe_get_user_fullname((object)array('id' => $ret->student, 'firstname' => $ret->firstname, 'lastname' => $ret->lastname));
 				$enableAssignStudent = ($defEnableAssignStudent && $ret->status == PRAXE_STATUS_REFUSED);
 			}else {
+				$row[] = "&nbsp;";
 				$enableAssignStudent = $defEnableAssignStudent;
 			}
 
