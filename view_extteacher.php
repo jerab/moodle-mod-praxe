@@ -100,16 +100,19 @@ class praxe_view_extteacher extends praxe_view {
 		$strsubject = get_string('subject','praxe');
 		if(praxe_has_capability('viewrecordstoanylocation') || praxe_has_capability('manageallincourse')) {
 			$viewteacher = true;
-			$table->head  = array ($strstud, $strschool, $strsubject, get_string('teacher','praxe'), $strstatus, get_string('inspection','praxe'), '&nbsp;');
+			$table->head  = array ('&nbsp;', $strstud, $strschool, $strsubject, get_string('teacher','praxe'), $strstatus, get_string('inspection','praxe'));
 			$table->align = array ('left', 'left', 'left', 'center', 'center', 'center', 'center');
 		}else {
 			$viewteacher = false;
-			$table->head  = array ($strstud, $strschool, $strsubject, $strstatus, get_string('inspection','praxe'), '&nbsp;');
+			$table->head  = array ('&nbsp;', $strstud, $strschool, $strsubject, $strstatus, get_string('inspection','praxe'));
 			$table->align = array ('left', 'left', 'left', 'center', 'center', 'center');
 		}
 
 		foreach($records as $rec) {
 			$row = array();
+			$url = praxe_get_base_url(array('mode'=>$mode,'recordid'=>$rec->id));
+			$row[] = "<a href=\"$url\" title=\"\">".get_string('detail','praxe')."</a>";
+
 			$user = (object) array('firstname'=>$rec->firstname, 'lastname'=>$rec->lastname, 'id'=>$rec->userid);
 			$row[] = praxe_get_user_fullname($user);
 			$row[] = s($rec->schoolname);
@@ -136,8 +139,6 @@ class praxe_view_extteacher extends praxe_view {
 			}else {
 			    $row[] = "---";
 			}
-			$url = praxe_get_base_url(array('mode'=>$mode,'recordid'=>$rec->id));
-			$row[] = "<a href=\"$url\" title=\"\">".get_string('detail','praxe')."</a>";
 			$table->data[] = $row;
 		}
 		return html_writer::table($table);
