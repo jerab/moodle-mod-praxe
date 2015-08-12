@@ -13,6 +13,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['levelofeducation-1st'] = 'Primary education';
 $string['levelofeducation-2nd'] = 'Lower secondary or second stage of basic education';
 $string['levelofeducation-3rd'] = '(Upper) secondary education';
 $string['active_records'] = 'Active records';

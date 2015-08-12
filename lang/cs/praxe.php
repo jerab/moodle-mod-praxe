@@ -1,4 +1,5 @@
 <?PHP
+$string['levelofeducation-1st'] = 'Primární vzdělávání (ISCED 1)';
 $string['levelofeducation-2nd'] = 'Nižší sekundární vzdělávání (ISCED 2)';
 $string['levelofeducation-3rd'] = 'Vyšší sekundární vzdělávání (ISCED 3)';
 $string['active_records'] = 'Aktivní záznamy';

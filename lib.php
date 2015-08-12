@@ -15,9 +15,11 @@
  */
 
 define('PRAXE_ISCED_0',0);
+define('PRAXE_ISCED_1',1);
 define('PRAXE_ISCED_2',2);
 define('PRAXE_ISCED_3',3);
 define('PRAXE_ISCED_0_TEXT',get_string('all'));
+define('PRAXE_ISCED_1_TEXT',get_string('levelofeducation-1st','praxe'));
 define('PRAXE_ISCED_2_TEXT',get_string('levelofeducation-2nd','praxe'));
 define('PRAXE_ISCED_3_TEXT',get_string('levelofeducation-3rd','praxe'));
 

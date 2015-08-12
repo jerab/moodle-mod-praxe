@@ -133,6 +133,8 @@ function praxe_object_search($needle,$haystack,$arraykey=false) {
 function praxe_get_isced_text($isced) {
 	if($isced == PRAXE_ISCED_0) {
 		return PRAXE_ISCED_0_TEXT;
+	}elseif($isced == PRAXE_ISCED_1) {
+		return PRAXE_ISCED_1_TEXT;
 	}elseif($isced == PRAXE_ISCED_2) {
 		return PRAXE_ISCED_2_TEXT;
 	}elseif($isced == PRAXE_ISCED_3) {

@@ -177,7 +177,7 @@ class praxe_view_student extends praxe_view {
 			$table->align = array('left','center','center');
     		$sch = new html_table();
 			$sch->data[] = array(get_string('address','praxe').":", s($data->street).', '.s($data->zip)."&nbsp;&nbsp;".s($data->city));
-    		if(!is_null($data->headmaster)) {
+    		if($data->headmaster > 0) {
     			$headmaster = (object)array('id'=>$data->headmaster, 'firstname'=>$data->head_name, 'lastname'=>$data->head_lastname);
     			$sch->data[] = array(get_string('headmaster','praxe').":", praxe_get_user_fullname($headmaster));
     		}
@@ -194,7 +194,7 @@ class praxe_view_student extends praxe_view {
     		$sch->data[] = array(get_string('contact','praxe').":",implode("<br />",$contact));
 			$schlink = $OUTPUT->action_link(praxe_get_base_url(array("viewaction"=>'viewschool',"schoolid"=>$data->school)),s($data->name),null,array('title'=>get_string('school_detail','praxe')));
 			$row = array($schlink . html_writer::table($sch), s($data->subject));
-			if(!is_null($data->teacherid)) {
+			if($data->teacherid > 0) {
     			$teacher = (object) array('id' => $data->teacherid, 'firstname' => s($data->teacher_name), 'lastname' => s($data->teacher_lastname));
     			$row[] = praxe_get_user_fullname($teacher);
     		}else {
@@ -233,8 +233,13 @@ class praxe_view_student extends praxe_view {
 		$params = $editlinks;
 		$delparams = array('praxeaction'=>'deleteschedule');
 		foreach($schedules as $item) {
+			if(is_null($item->lesnumber)) {
+				$item->lesnumber = "---";
+			}else {
+				$item->lesnumber .= ".";
+			}
 			$row = array(	userdate((int)$item->timestart, get_string('strftimedateshort')),
-							(int)$item->lesnumber.".",
+							$item->lesnumber,
 							//date('G:i',(int)$item->timestart) .' - '. date('G:i',(int)$item->timeend),
 							userdate((int)$item->timestart, "%H:%M") . ' - ' . userdate((int)$item->timeend, "%H:%M"),
 							praxe_get_yearclass($item->yearclass),

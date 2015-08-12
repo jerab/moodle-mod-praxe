@@ -58,7 +58,6 @@ class mod_praxe_mod_form extends moodleform_mod {
 	*/
 //-------------------------------------------------------------------------------
     /// Adding the rest of praxe settings, spreeading all them into this fieldset
-        //$mform->addElement('static', 'label1', 'praxesetting1', 'Your praxe fields go here. Replace me! - mod_form.php');
         $mform->addElement('header', 'praxefieldset', get_string('praxefieldset', 'praxe'));
 	///	Adding the "study field" select field to choose subject of current course
         if($options = $this->getStudyFields()) {
@@ -67,6 +66,7 @@ class mod_praxe_mod_form extends moodleform_mod {
 		}
 	///	Adding the "isced" select field to choose the isced level for current course
 		$options = array(	PRAXE_ISCED_0 => PRAXE_ISCED_0_TEXT,
+							PRAXE_ISCED_1 => PRAXE_ISCED_1_TEXT,
 							PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
 							PRAXE_ISCED_3 => PRAXE_ISCED_3_TEXT);
 		$mform->addElement('select', 'isced', get_string('iscedlevel', 'praxe'), $options);

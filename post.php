@@ -194,7 +194,7 @@
 			    /// it is not supposed to be teacher or admin role (but extteacher or headmaster) and not selected by student ///
 			    if($bManage && !$used) {
 			        $post->school = required_param('school',PARAM_INT);
-				    $post->teacher = required_param('teacher',PARAM_INT);
+				    $post->teacher = optional_param('teacher', null, PARAM_INT);
 				    $post->studyfield = required_param('studyfield',PARAM_INT);
 				    $post->isced = required_param('isced',PARAM_INT);
 				    $post->year = required_param('year',PARAM_INT);
@@ -307,24 +307,44 @@
 
 				break;
 			case ('makeschedule'):
+				$aErrors = array();
 				require_capability('mod/praxe:addstudentschedule', $context);
 
-				$post->yearclass = required_param('yearclass',PARAM_INT);
-				$post->lessubject = required_param('lessubject',PARAM_TEXT);
-				$post->lesnumber = optional_param('lesnumber',0,PARAM_INT);
-				$post->schoolroom = optional_param('schoolroom','',PARAM_TEXT);
-				$post->lestheme = optional_param_array('lestheme','',PARAM_RAW);
-				$post->lestheme = $post->lestheme['text'];
+				$post->record = praxe_record::getData('rec_id');
 				$timestart = required_param_array('timestart', PARAM_INT);
 				$timeend = required_param_array('timeend', PARAM_INT);
 				$post->timestart = mktime($timestart['hour'],$timestart['minute'], null, $timestart['month'],$timestart['day'],$timestart['year']);
 				$post->timeend = mktime($timeend['hour'],$timeend['minute'], null, $timeend['month'],$timeend['day'],$timeend['year']);
 
 				if($post->timestart > $post->timeend || $post->timestart < time()+60*60*24) {
-					redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_timeschedule','praxe'));
+					$aErrors[] = get_string('error_timeschedule','praxe');
+					//redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_timeschedule','praxe'));
 				}
-				$post->record = praxe_record::getData('rec_id');
 
+				$post->yearclass = required_param('yearclass',PARAM_INT);
+				$post->lessubject = required_param('lessubject',PARAM_TEXT);
+				$post->lesnumber = optional_param('lesnumber', null, PARAM_INT);
+				if($post->lesnumber == -1) {
+					$post->lesnumber = null;
+				}
+				$post->schoolroom = required_param('schoolroom',PARAM_TEXT);
+				if(trim($post->schoolroom) == '') {
+					$aErrors[] = get_string('error_schoolroom','praxe');
+					//redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_schoolroom','praxe'));
+				}
+				$post->lestheme = optional_param_array('lestheme','',PARAM_RAW);
+				$post->lestheme = $post->lestheme['text'];
+
+				if(count($aErrors)) {
+					if(!empty($edit)) {
+						redirect(praxe_get_base_url(array(	'mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE],
+															'edit' => 'editschedule',
+															'scheduleid' => required_param('scheduleid',PARAM_INT))),
+								implode(', ', $aErrors));
+					}else {
+						redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), implode(', ', $aErrors));
+					}
+				}
 				$redurl = praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
 				/// insert record ///
 				if(empty($edit)) {

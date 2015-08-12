@@ -114,8 +114,10 @@ class praxe_view_extteacher extends praxe_view {
 			$row[] = praxe_get_user_fullname($user);
 			$row[] = s($rec->schoolname);
 			$row[] = s($rec->subject);
-			if($viewteacher) {
+			if($viewteacher && $rec->teacherid) {
 				$row[] = praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname));
+			}else {
+				$row[] = get_string('unlisted','praxe');
 			}
 
 			if($rec->status == PRAXE_STATUS_ASSIGNED) {
@@ -190,7 +192,7 @@ class praxe_view_extteacher extends praxe_view {
 		$tab1->attributes['class'] = "floatinfotable left twocolstable";
 		$tab1->data[] = array(get_string('school','praxe').":", $rec->name);
 		$tab1->data[] = array(get_string('subject','praxe').":", $rec->subject);
-		if($USER->id != $rec->teacherid) {
+		if($rec->teacherid && $USER->id != $rec->teacherid) {
 			$tab1->data[] = array(get_string('teacher','praxe').":", praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname)));
 		}
 		/// right top table ///
@@ -225,11 +227,17 @@ class praxe_view_extteacher extends praxe_view {
 		}
 		/// schedule table ///
 		$tab3 = new html_table();
-		sort($cols);
+		if(count($cols)) {
+			sort($cols);
+		}
 		$tab3->head = $cols;
 		array_unshift($tab3->head, get_string('date'));
 		for($i = 1; $i < count($tab3->head); $i++) {
-			$tab3->head[$i] = s($tab3->head[$i]).".".get_string('lesson','praxe');
+			if(is_null($tab3->head[$i])) {
+				$tab3->head[$i] = "---";
+			}else {
+				$tab3->head[$i] = s($tab3->head[$i]).".".get_string('lesson','praxe');
+			}
 		}
         $cellf = new html_table_cell();
 		$cellf->attributes['class'] = "header first";
@@ -280,7 +288,7 @@ class praxe_view_extteacher extends praxe_view {
 		}
 		return $return . html_writer::table($tab3);
 	}
-	public function show_schedule_detail($schedule) {
+	public static function show_schedule_detail($schedule) {
 		$tab2 = new html_table();
 		$tab2->align = array('right', 'left');
 		$tab2->cellpadding = '2px';
@@ -329,7 +337,7 @@ class praxe_view_extteacher extends praxe_view {
 		}
 		return html_writer::table($table);
 	}
-	public function confirm_location_form($recordid) {
+	public static function confirm_location_form($recordid) {
 		$form = '<div>'.get_string('please_confirm_record','praxe').'</div>';
 		$form .= '<form action="'.praxe_get_base_url().'" method="post">';
 		$form .= '<input type="hidden" name="post_form" value="confirmlocation" />';

@@ -1,4 +1,4 @@
-<?php  
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -45,10 +45,24 @@
 defined('MOODLE_INTERNAL') || die;
 
 function xmldb_praxe_upgrade($oldversion) {
-    global $DB;    
+    global $DB;
     $dbman = $DB->get_manager();
 
-    return true;
+    $result = true;
+    if ($oldversion < 2015081200) {
+
+    	// Changing nullability of field teacher on table praxe_locations to null.
+    	$table = new xmldb_table('praxe_locations');
+    	$field = new xmldb_field('teacher', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'subject');
+
+    	// Launch change of nullability for field teacher.
+    	$dbman->change_field_notnull($table, $field);
+
+    	// Praxe savepoint reached.
+    	upgrade_mod_savepoint(true, 2015081200, 'praxe');
+    }
+
+    return $result;
 }
 
 ?>

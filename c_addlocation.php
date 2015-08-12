@@ -36,7 +36,9 @@ class praxe_addlocation extends praxe_actionform {
 			$mform->addElement('hidden', 'teacher', $t->ext_teacher_id);
 			$mform->addElement('static', 'static_teacher', get_string('extteacher', 'praxe'), s($t->firstname).' '.s($t->lastname));
 		}else{
-			$this->error = get_string('no_teachers_for_this_school', 'praxe');
+			//$this->error = get_string('no_teachers_for_this_school', 'praxe');
+			$t = array_shift($teachers);
+			$mform->addElement('static', 'static_teacher', get_string('extteacher', 'praxe'), get_string('no_teachers_available', 'praxe'));
 		}
 
 		if(!$this->error) {

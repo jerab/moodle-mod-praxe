@@ -6,7 +6,7 @@ class praxe_makeschedule extends praxe_actionform {
 		parent::praxe_actionform(get_class($this));
 	}
     public function definition() {
-	$mform =& $this->_form;
+		$mform =& $this->_form;
 
         $mform->addElement('hidden', 'post_form', 'makeschedule');
     	$options = array(	'startyear' => praxe_record::getData('year'),
@@ -21,13 +21,28 @@ class praxe_makeschedule extends praxe_actionform {
         $mform->addElement('date_time_selector', 'timeend', get_string('lesson_end','praxe'), $options);
         $mform->setDefault('timestart', array('day' => date('j'), 'month' => date('n'), 'year' => praxe_record::getData('year'), 'hour' => 8, 'minute' => 0));
         $mform->setDefault('timeend', array('day' => date('j'), 'month' => date('n'), 'year' => praxe_record::getData('year'), 'hour' => 8, 'minute' => 45));
-        $options = array('null'=>get_string('choose'),'0'=>'0.', '1'=>'1.', '2'=>'2.', '3'=>'3.', '4'=>'4.', '5'=>'5.', '6'=>'6.', '7'=>'7.', '8'=>'8.', '9'=>'9.',
+
+        $options = array('-1'=>'---','0'=>'0.', '1'=>'1.', '2'=>'2.', '3'=>'3.', '4'=>'4.', '5'=>'5.', '6'=>'6.', '7'=>'7.', '8'=>'8.', '9'=>'9.',
         				'10'=>'10.', '11'=>'11.', '12'=>'12.', '13'=>'13.', '13'=>'13.', '14'=>'14.', '15'=>'15.');
         $mform->addElement('select', 'lesnumber', get_string('lesson_number','praxe'), $options);
-        $mform->addRule('lesnumber',null, 'required',null, 'client');
-        $mform->addRule('lesnumber',get_string('choose_lesson_number_info','praxe'), 'numeric', null, 'client');
-        $options = array('6'=>PRAXE_ISCED_2_TEXT.' - 6.', '7'=>PRAXE_ISCED_2_TEXT.' - 7.', '8'=>PRAXE_ISCED_2_TEXT.' - 8.', '9'=>PRAXE_ISCED_2_TEXT.' - 9.',
-        				 '10'=>PRAXE_ISCED_3_TEXT.' - 1.', '11'=>PRAXE_ISCED_3_TEXT.' - 2.', '12'=>PRAXE_ISCED_3_TEXT.' - 3.', '13' => PRAXE_ISCED_3_TEXT.' - 4.', '14' => PRAXE_ISCED_3_TEXT.' - 5.');
+        //$mform->addRule('lesnumber',null, 'required',null, 'client');
+        //$mform->addRule('lesnumber',get_string('choose_lesson_number_info','praxe'), 'numeric', null, 'client');
+		switch (praxe_record::getData('isced')) {
+			case PRAXE_ISCED_1:
+				$options = array('1'=>PRAXE_ISCED_1_TEXT.' - 1.', '2'=>PRAXE_ISCED_1_TEXT.' - 2.', '3'=>PRAXE_ISCED_1_TEXT.' - 3.', '4'=>PRAXE_ISCED_1_TEXT.' - 4.', '5'=>PRAXE_ISCED_1_TEXT.' - 5.');
+				break;
+			case PRAXE_ISCED_2:
+				$options = array('6'=>PRAXE_ISCED_2_TEXT.' - 6.', '7'=>PRAXE_ISCED_2_TEXT.' - 7.', '8'=>PRAXE_ISCED_2_TEXT.' - 8.', '9'=>PRAXE_ISCED_2_TEXT.' - 9.');
+				break;
+			case PRAXE_ISCED_1:
+				$options = array('10'=>PRAXE_ISCED_3_TEXT.' - 1.', '11'=>PRAXE_ISCED_3_TEXT.' - 2.', '12'=>PRAXE_ISCED_3_TEXT.' - 3.', '13' => PRAXE_ISCED_3_TEXT.' - 4.', '14' => PRAXE_ISCED_3_TEXT.' - 5.');
+				break;
+			default:
+				$options = array(	'1'=>PRAXE_ISCED_1_TEXT.' - 1.', '2'=>PRAXE_ISCED_1_TEXT.' - 2.', '3'=>PRAXE_ISCED_1_TEXT.' - 3.', '4'=>PRAXE_ISCED_1_TEXT.' - 4.', '5'=>PRAXE_ISCED_1_TEXT.' - 5.',
+						'6'=>PRAXE_ISCED_2_TEXT.' - 6.', '7'=>PRAXE_ISCED_2_TEXT.' - 7.', '8'=>PRAXE_ISCED_2_TEXT.' - 8.', '9'=>PRAXE_ISCED_2_TEXT.' - 9.',
+						'10'=>PRAXE_ISCED_3_TEXT.' - 1.', '11'=>PRAXE_ISCED_3_TEXT.' - 2.', '12'=>PRAXE_ISCED_3_TEXT.' - 3.', '13' => PRAXE_ISCED_3_TEXT.' - 4.', '14' => PRAXE_ISCED_3_TEXT.' - 5.');
+				break;
+		}
         $mform->addElement('select', 'yearclass', get_string('yearclass','praxe'), $options);
         $mform->addElement('text', 'schoolroom', get_string('schoolroom','praxe'), array('size'=>'12'));
         $mform->addRule('schoolroom', null, 'required', null, 'client');
