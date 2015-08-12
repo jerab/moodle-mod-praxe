@@ -189,7 +189,7 @@ class praxe_view_extteacher extends praxe_view {
 		/// left top table ///
 		$tab1 = new html_table();
 		$tab1->align = array('right', 'left');
-		//$tab1->width = '40%';
+		//$tab1->width = '300px';
 		$tab1->attributes['class'] = "floatinfotable left twocolstable";
 
 		$school = array($rec->name);
@@ -213,8 +213,8 @@ class praxe_view_extteacher extends praxe_view {
 		/// right top table ///
 		$tab2 = new html_table();
 		$tab2->align = array('right', 'left');
-		//$tab2->width = '40%';
-		$tab1->attributes['class'] = "floatinfotable right twocolstable";
+		//$tab2->width = '350px';
+		$tab2->attributes['class'] = "floatinfotable left twocolstable last";
 		$tab2->data[] = array(get_string('student', 'praxe').":", praxe_get_user_fullname($rec->student));
 		$tab2->data[] = array(get_string('status','praxe').":", praxe_get_status_info($rec->status));
 	    if($rec->status == PRAXE_STATUS_ASSIGNED) {
