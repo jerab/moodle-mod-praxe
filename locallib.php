@@ -442,7 +442,8 @@ function praxe_get_ext_teachers_at_school($headm = null, $schoolid = null) {
 function praxe_get_record($recordid) {
 	global $CFG, $DB;
 	$sql = "SELECT rec.*, stud.id as userid, stud.firstname, stud.lastname,
-			subject, loc.id as locationid, name as name,
+			subject, loc.id as locationid,
+			school.name as name, school.street, school.city, school.email, school.phone, school.type as schooltype,
 			ext.id as extteacherid, teacher.id as teacherid, teacher.firstname as teacher_firstname, teacher.lastname as teacher_lastname
 			FROM {praxe_records} rec
 			LEFT JOIN {user} stud ON(stud.id = rec.student)

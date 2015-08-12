@@ -185,13 +185,27 @@ class praxe_view_extteacher extends praxe_view {
 	 * @return string
 	 */
 	public static function show_record_detail($rec) {
-	    global $mode, $USER, $CFG, $OUTPUT;
+		global $mode, $USER, $CFG, $OUTPUT;
 		/// left top table ///
 		$tab1 = new html_table();
 		$tab1->align = array('right', 'left');
 		//$tab1->width = '40%';
 		$tab1->attributes['class'] = "floatinfotable left twocolstable";
-		$tab1->data[] = array(get_string('school','praxe').":", $rec->name);
+
+		$school = array($rec->name);
+		if(strlen(trim($rec->city))) {
+			$school[] = $rec->city;
+		}
+		if(strlen(trim($rec->street))) {
+			$school[] = $rec->street;
+		}
+		if(strlen(trim($rec->phone))) {
+			$school[] = $rec->phone;
+		}
+		if(strlen(trim($rec->email))) {
+			$school[] = $rec->email;
+		}
+		$tab1->data[] = array(get_string('school','praxe').":", format_string(implode(', ', $school)));
 		$tab1->data[] = array(get_string('subject','praxe').":", $rec->subject);
 		if($rec->teacherid && $USER->id != $rec->teacherid) {
 			$tab1->data[] = array(get_string('teacher','praxe').":", praxe_get_user_fullname((object)array('id'=>$rec->teacherid, 'firstname'=>$rec->teacher_firstname, 'lastname'=>$rec->teacher_lastname)));
