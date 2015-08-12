@@ -187,14 +187,14 @@
 			    $bManage = praxe_has_capability('manageallincourse');
 			    if(!is_null($edit)) {
 			        $post->id = required_param('locationid',PARAM_INT);
-			        $used = $DB->record_exists_select('praxe_records', 'location = '.$post->id.' AND status <> '.PRAXE_STATUS_REFUSED);
-			    }else {
-			        $used = false;
 			    }
-			    /// it is not supposed to be teacher or admin role (but extteacher or headmaster) and not selected by student ///
-			    if($bManage && !$used) {
+			    /// it is not supposed to be teacher or admin role (but extteacher or headmaster) ///
+			    if($bManage) {
 			        $post->school = required_param('school',PARAM_INT);
 				    $post->teacher = optional_param('teacher', null, PARAM_INT);
+				    if($post->teacher < 1) {
+						$post->teacher = null;
+				    }
 				    $post->studyfield = required_param('studyfield',PARAM_INT);
 				    $post->isced = required_param('isced',PARAM_INT);
 				    $post->year = required_param('year',PARAM_INT);
@@ -204,7 +204,6 @@
 				    }
 				    $post->active = required_param('active',PARAM_INT);
 				}
-
 			    $post->subject = required_param('subject',PARAM_TEXT);
 
 				if(!$bManage) {
