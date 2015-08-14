@@ -110,3 +110,34 @@
 	width: 100px;
 	text-align: left;
 }
+
+/** form and rows in forms **/
+.path-mod-praxe form.mform {
+	margin-top: 30px;
+}
+
+.path-mod-praxe form.mform div.frow {
+	margin-top: 20px;	
+}
+
+.path-mod-praxe form.mform div.frow.submit {
+	padding-left: 230px;	
+}
+
+
+.path-mod-praxe form.mform div.frow > label {
+	font-weight: bold;
+	text-align: right;
+	display: inline-block;
+    margin-right: 30px;
+    min-width: 200px;    
+    vertical-align: top;
+}
+.path-mod-praxe form.mform div.frow > div {
+	text-align: left;
+	display: inline-block;	
+}
+
+.path-mod-praxe .filterselector .singleselect {
+	margin-right: 20px;
+}

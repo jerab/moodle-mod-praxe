@@ -27,34 +27,37 @@ class praxe_assignstudtolocation extends praxe_actionform {
 
  		if(!empty($location)) {
  			$this->content_before_form .= html_writer::tag('p',get_string('assignstudtolocation_text', 'praxe'));
-    		$table = new html_table();
-    		$table->head[] = get_string('location','praxe');
 
-    		$info = $location->name. ' - ' .praxe_get_term_text($location->term). ' ' .$location->year;
-    		if(!is_null($location->teacherid)) {
-    			$info .= ' - '.s($location->teacher_name). ' ' .s($location->teacher_lastname);
+ 			$info = $location->name;
+    		if(strlen(trim($location->city))) {
+    			$info .= ", ".s($location->city);
+    		}
+    		if(strlen(trim($location->street))) {
+    			$info .= ", ".s($location->street);
     		}
     		$info = html_writer::tag('strong',$info);
+    		if(strlen(trim($location->subject))) {
+    			$info .= '<br>'.html_writer::tag('strong',s($location->subject));
+    		}
+    		if(!is_null($location->teacherid)) {
+    			$info .= '<br>'.s($location->teacher_name). ' ' .s($location->teacher_lastname);
+    		}
+    		$info .= '<br>'.praxe_get_term_text($location->term). ' ' .$location->year;
+
+    		$this->content_before_form .= html_writer::tag('p',$info);
 
     		// location is occupied
     		$sql = "SELECT rec.* FROM {praxe_records} rec WHERE rec.location = ? AND rec.status != ?";
     		$params = array($this->locationid, PRAXE_STATUS_REFUSED);
     		if($ret = $DB->get_record_sql($sql, $params)) {
-    			$table->data[] = array($info);
-    			$table->data[] = array(get_string('location_is_not_available', 'praxe'));
-    			$table->data[] = array($back);
-    			$table->align = array('center');
-    			$this->content .= html_writer::table($table,true);
-
+    			$this->content .= html_writer::tag('div', get_string('location_is_not_available', 'praxe'));
+    			$this->content .= html_writer::tag('div', $back);
     		/// location and users are available
     		} else if(is_array($users) && count($users)) {
-				$table->head[] = get_string('student','praxe');
-
 				$form = '<form class="mform" action="'.praxe_get_base_url(array('locationid'=>$this->locationid),'assigntolocation').'" method="post">';
 				$form .= '<input type="hidden" name="post_form" value="assigntolocation" />';
 				$form .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
 				$form .= '<input type="hidden" name="location" value="'.$this->locationid.'" />';
-				$table->align = array('left','center');
 
 				$select = '<select name="student">';
 				$select .= '<option value="null">'.get_string('select_student','praxe').'</option>';
@@ -62,38 +65,28 @@ class praxe_assignstudtolocation extends praxe_actionform {
 					$select .= '<option value="'.$us->id.'">'.s($us->firstname.' '.$us->lastname).'</option>';
 	    		}
 	    		$select .= '</select>';
-
-	    		$table->data[] = array($info, $select);
+				$form .= html_writer::tag('div', html_writer::tag('label', get_string('student')). html_writer::tag('div', $select), array('class' => 'frow'));
 
 	    		/// option to send emails
 	    		require_once($CFG->dirroot . "/lib/pear/HTML/QuickForm/checkbox.php");
 
-	    		$cel =  new html_table_cell();
-	    		$cel->colspan = 2;
-	    		$check = new HTML_QuickForm_checkbox('sendemailtoextteacher','',get_string('sendinfotoextteacher','praxe'));
-	    		$cel->text = $check->toHtml();
-	    		$table->data[] = new html_table_row(array($cel));
-
-	    		$cel =  new html_table_cell();
-	    		$cel->colspan = 2;
+	    		$checks = '';
+	    		if(!is_null($location->teacherid)) {
+		    		$check = new HTML_QuickForm_checkbox('sendemailtoextteacher','',get_string('sendinfotoextteacher','praxe'));
+		    		$checks .= html_writer::tag('div', $check->toHtml());
+	    		}
 	    		$check = new HTML_QuickForm_checkbox('sendemailtostudent','',get_string('sendinfotostudent','praxe'),'checked');
-	    		$cel->text = $check->toHtml();
-	    		$table->data[] = new html_table_row(array($cel));
+	    		$checks .= $check->toHtml();
+	    		$form .= html_writer::tag('div', html_writer::tag('label', get_string('informparticipants')).html_writer::tag('div', $checks), array('class' => 'frow'));
 
 	    		/// action buttons
-	    		$cel =  new html_table_cell();
-				$cel->colspan = 2;
-				$cel->style = 'text-align:center';
-				$cel->text = '<div class="fitem center" style="margin: 10px 0;">'
-							.'<input type="submit" id="id_submitbutton" value="Submit" name="submitbutton" /> '
-							.'<input type="submit" id="id_cancel" onclick="skipClientValidation = true; return true;" value="Cancel" name="cancel" />'
-							.'</div>';
-				$sub = new html_table_row();
-				$sub->cells[] = $cel;
-				$table->data[] = $sub;
-				$form .= html_writer::table($table,true);
+	    		//$sub = '<div class="fitem center" style="margin: 10px 0;">'
+				$sub = 	'<input type="submit" id="id_submitbutton" value="Submit" name="submitbutton" /> '
+						.'<input type="submit" id="id_cancel" onclick="skipClientValidation = true; return true;" value="Cancel" name="cancel" />';
+	    		//felement fsubmit
+				$form .= html_writer::tag('div', $sub, array('class' => 'frow submit'));
 				$form .= '</form>';
-				$this->content .= "<div>$form</div>";
+				$this->content .= html_writer::tag('div', $form, array('class' => 'thin-form'));
 			/// no students to be assigned to location
     		}else {
 				$table->data[] = array(get_string('nostudentsavailable','praxe'));
