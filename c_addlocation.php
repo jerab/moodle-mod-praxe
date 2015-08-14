@@ -42,7 +42,8 @@ class praxe_addlocation extends praxe_actionform {
         		$options[$sf->id] = $sf->name." (".$sf->shortcut.")";
         	}
 			$mform->addElement('select', 'studyfield', get_string('studyfield', 'praxe'), $options);
-			$options = array(	PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
+			$options = array(	PRAXE_ISCED_1 => PRAXE_ISCED_1_TEXT,
+								PRAXE_ISCED_2 => PRAXE_ISCED_2_TEXT,
 								PRAXE_ISCED_3 => PRAXE_ISCED_3_TEXT);
 			$mform->addElement('select', 'isced', get_string('iscedlevel', 'praxe'), $options);
 	        $mform->addElement('text', 'subject', get_string('subject', 'praxe'), array('size'=>'64'));
