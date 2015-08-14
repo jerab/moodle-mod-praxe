@@ -80,26 +80,62 @@ class praxe_view_headm extends praxe_view {
 		require_once($CFG->dirroot . '/mod/praxe/c_addlocation.php');
 		$this->form = new praxe_addlocation();
 	}
-	public static function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0, $year = 0) {
+	/**
+	 *
+	 * @param string $schoolid
+	 * @param string $headmid
+	 * @param unknown $editlinkparams
+	 * @param number $bOnlyActual
+	 * @param number $year
+	 * @param array $aSort Associative array with column as key and ASC/DESC/null as value
+	 * @return Ambigous <string, lang_string>|string
+	 */
+	public static function show_locations($schoolid = null, $headmid = null, $editlinkparams = array(), $bOnlyActual = 0, $year = 0, $aSort = array()) {
 		global $USER, $cm, $OUTPUT, $DB;
 		$schoolid = ($schoolid) ? $schoolid : null;
-		$locs = praxe_get_locations_by_schooldata($schoolid, $headmid, $bOnlyActual, $year);
+		$sortAvailable = array('sschool'=>'name', 'sstudyfield'=>'studyfieldname', 'sisced'=>'isced', 'syear'=>'year', 'ssubject'=>'subject', 'sactive'=>'active');
+		$aSortcorrect = array_intersect(array_keys($sortAvailable), array_keys($aSort));
+		$sort = array();
+		foreach($aSortcorrect as $k) {
+			if(!is_null($aSort[$k])) {
+				$sort[] = $sortAvailable[$k].' '.$aSort[$k];
+			}
+		}
+		$locs = praxe_get_locations_by_schooldata($schoolid, $headmid, $bOnlyActual, $year, implode(', ', array_reverse($sort)));
 		if(!$locs) {
 			return get_string('nolocationsavailable','praxe');
 		}
 		$defEnableAssignStudent = praxe_has_capability('assignstudenttolocation');
 
 		$table = new html_table();
+
+		$baseLink = praxe_get_base_url(array('mode'=>'locations', 'schoolid'=>(int)$schoolid, 'fyearloc'=>$year, 'factual'=>$bOnlyActual));
 		$h = array();
-		$h[] = get_string('school','praxe');
-		$h[] = get_string('subject','praxe');
+		$aHeadSorting = array(	'sschool'=>get_string('school','praxe'),
+								'ssubject'=>get_string('subject','praxe'),
+								'sactive'=>get_string('active','praxe'),
+								'sstudyfield'=>get_string('studyfield','praxe'),
+								'sisced'=>get_string('iscedlevel','praxe'),
+								'syear'=>get_string('year','praxe'));
+		foreach($aHeadSorting as $k=>$text) {
+			if(isset($aSort[$k])) {
+				$toLink = ($aSort[$k] == 'ASC') ? 'DESC' : 'ASC';
+				$sOut = $OUTPUT->action_link($baseLink.'&amp;'.$k.'='.$toLink, $text);
+				$sOut .= $OUTPUT->pix_icon('t/sort_'.strtolower($aSort[$k]), $aSort[$k]);
+			}else {
+				$sOut = $OUTPUT->action_link($baseLink.'&amp;'.$k.'=ASC', $text);
+			}
+			$aHeadSorting[$k] = $sOut;
+		}
+		$h[] = $aHeadSorting['sschool'];
+		$h[] = $aHeadSorting['ssubject'];
 		$h[] = get_string('extteacher','praxe');
-		$h[] = get_string('studyfield','praxe');
-		$h[] = get_string('iscedlevel','praxe');
-		$h[] = get_string('year','praxe');
+		$h[] = $aHeadSorting['sstudyfield'];
+		$h[] = $aHeadSorting['sisced'];
+		$h[] = $aHeadSorting['syear'];
 		$h[] = get_string('term','praxe');
 		$h[] = get_string('actual_status','praxe');
-		$h[] = get_string('active','praxe');
+		$h[] = $aHeadSorting['sactive'];
 		$h[] = get_string('student','praxe');
 		$table->head = $h;
 		$table->align = array ('left', 'left', 'left', 'left', 'left', 'center','center','left','center');
@@ -190,7 +226,7 @@ class praxe_view_headm extends praxe_view {
 
         $table->colclasses = array('praxe_cell right', 'praxe_cell left');
 
-        $table->data[] = array(get_string('school_detail','praxe'), s($school->name));
+        $table->data[] = array(get_string('schoolname','praxe'), s($school->name));
 		$table->data[] = array(get_string('schooltype','praxe'), praxe_get_schooltype_info($school->type));
 		$table->data[] = array(get_string('street','praxe'), s($school->street));
 		$table->data[] = array(get_string('city','praxe'), s($school->city));
@@ -218,42 +254,58 @@ class praxe_view_headm extends praxe_view {
 	 * @param array $schools - array of schools objects to be displayed
 	 * @param array $editlinkparams[optional] - default parameters to url that are always added: id=$cm->id, schoolid=id of school.<br>
 	 * Extra parameters to be added must be in array format as nameOfParameter=>value
+	 * @param array $aSort[optional] - used sorting in actual list of schools (name, type) - values (ASC, DESC)
+	 * Items must be in array format as nameOfParameter=>value
 	 * @return string
 	 */
-	public static function show_schools($schools, $editlinkparams = array()) {
+	public static function show_schools($schools, $editlinkparams = array(), $aSort = array()) {
 		global $USER, $OUTPUT;
-
+		$baseLink = praxe_get_base_url(array('mode'=> 'schools'));
 		$table = new html_table();
 		$strname = get_string('schoolname','praxe');
+		if(isset($aSort['name'])) {
+			$toLink = ($aSort['name'] == 'ASC') ? 'DESC' : 'ASC';
+			$strname = $OUTPUT->action_link($baseLink.'&amp;sname='.$toLink, $strname);
+			$strname .= $OUTPUT->pix_icon('t/sort_'.strtolower($aSort['name']), $aSort['name']);
+		}else {
+			$strname = $OUTPUT->action_link($baseLink.'&amp;sname=ASC', $strname);
+		}
 		$strtype = get_string('schooltype','praxe');
+		if(isset($aSort['type'])) {
+			$toLink = ($aSort['type'] == 'ASC') ? 'DESC' : 'ASC';
+			$strtype = $OUTPUT->action_link($baseLink.'&amp;stype='.$toLink, $strtype);
+			$strtype .= $OUTPUT->pix_icon('t/sort_'.strtolower($aSort['type']), $aSort['type']);
+		}else {
+			$strtype = $OUTPUT->action_link($baseLink.'&amp;stype=ASC', $strtype);
+		}
 		$straddress = get_string('address','praxe');
 		$strcontact = get_string('contact','praxe');
 		$table->head = array($strname, $strtype, $straddress, $strcontact);
 		$table->align = array ('left', 'left', 'left', 'left');
+		$params = array();
+		foreach($editlinkparams as $name=>$val) {
+			$params[s($name)] = s($val);
+		}
+		$baseLink = praxe_get_base_url($params);
 		foreach($schools as $sch) {
 			$address = s($sch->street).', '.s($sch->zip).'  '.s($sch->city);
-			$contact = new html_table();
-			//$contact->head = array('');
-			$contact->data = array();
-			if(!empty($sch->phone)) {
-				$contact->data[] = array(s($sch->phone));
-			}
+			$contact = array();
 			if(!empty($sch->email)) {
-				$contact->data[] = array(s($sch->email));
+				$contact[] = s($sch->email);
+			}
+			if(!empty($sch->phone)) {
+				$contact[] = s($sch->phone);
 			}
 			if(!empty($sch->website)) {
-				$contact->data[] = array(s($sch->website));
+				$contact[] = s($sch->website);
 			}
+			$contact = html_writer::tag('p', implode("<br>", $contact));
+
 			$schooltype = constant('PRAXE_SCHOOL_TYPE_'.(int)$sch->type.'_TEXT');
-			$contact = html_writer::table($contact);
 			$row = array(s($sch->name), $schooltype, $address, $contact);
 			if(praxe_has_capability('editanyschool') || (praxe_has_capability('editownschool') && $sch->headmaster == $USER->id)) {
 				$stredit = get_string('editschool','praxe');
-				$params = array("schoolid"=>$sch->id);
-				foreach($editlinkparams as $name=>$val) {
-					$params[s($name)] = s($val);
-				}
-				$row[] = $OUTPUT->action_icon(praxe_get_base_url($params), new pix_icon('t/edit',$stredit));
+				$row[] = $OUTPUT->action_icon($baseLink.'&amp;schoolid='.$sch->id, new pix_icon('t/edit',$stredit));
 			}
 			$table->data[] = $row;
 		}

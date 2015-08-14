@@ -35,8 +35,22 @@ class praxe_view_editteacher extends praxe_view {
 				require_once($CFG->dirroot . '/mod/praxe/view_headm.php');
 				$schoolid = optional_param('schoolid', 0, PARAM_INT);
 				if($schoolid == 0) {
-					$schools = $DB->get_records('praxe_schools');
-					$this->content .= praxe_view_headm::show_schools($schools, array('mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_EDITSCHOOL]));
+					/// sorting list
+					$sname = strtoupper(optional_param('sname', null, PARAM_ALPHA));
+					$stype = strtoupper(optional_param('stype', null, PARAM_ALPHA));
+					$sort = array();
+					$aSort = array();
+					if($sname == 'ASC' || $sname == 'DESC') {
+						$sort[] = 'name '.$sname;
+						$aSort['name'] = $sname;
+					}
+					if($stype == 'ASC' || $stype == 'DESC') {
+						$sort[] = 'type '.$stype;
+						$aSort['type'] = $stype;
+					}
+					$sort = (count($sort) ? implode(', ', $sort) : '');
+					$schools = $DB->get_records('praxe_schools', array(), $sort);
+					$this->content .= praxe_view_headm::show_schools($schools, array('mode' => $tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_EDITSCHOOL]), $aSort);
 				}else{
 					$this->content .= praxe_view_headm::show_school($schoolid, array('mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_EDITSCHOOL]));
 				}
@@ -82,8 +96,20 @@ class praxe_view_editteacher extends praxe_view {
 					$this->form->set_redirect_url(null, array('mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS], 'schoolid'=>$schoolid));
 					$this->form->set_form_to_edit($loc);
 				}else{
+					/// sorting list
+					$sortFields = array('sschool','sstudyfield','sisced','syear','ssubject','sactive');
+					$aSort = array();
+					foreach($sortFields as $f) {
+						$s_{$f} = strtoupper(optional_param($f, null, PARAM_ALPHA));
+						if($s_{$f} == 'ASC' || $s_{$f} == 'DESC') {
+							$aSort[$f] = $s_{$f};
+						}else {
+							$aSort[$f] = null;
+						}
+					}
 				    require_once($CFG->dirroot . '/mod/praxe/view_headm.php');
-					$this->content .= praxe_view_headm::show_locations($schoolid,null,array('edit'=>'true', 'mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS],'schoolid'=>$schoolid),$factual, $fyear);
+				    $params = array('edit'=>'true', 'mode'=>$tab_modes['editteacher'][PRAXE_TAB_EDITTEACHER_LOCATIONS],'schoolid'=>$schoolid);
+					$this->content .= praxe_view_headm::show_locations($schoolid,null,$params,$factual, $fyear, $aSort);
 				}
 				break;
 			case PRAXE_TAB_EDITTEACHER_ADDLOCATION :

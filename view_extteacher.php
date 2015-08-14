@@ -334,20 +334,20 @@ class praxe_view_extteacher extends praxe_view {
 		foreach($schools as $sch) {
 			$schname = "<a href=\"".praxe_get_base_url(array("mode"=>$tab_modes['extteacher'][PRAXE_TAB_EXTTEACHER_MYSCHOOLS],"schoolid"=>$sch->id))."\" title=\"".get_string('detail','praxe')."\">".s($sch->name)."</a>";
 			$address = s($sch->street).', '.s($sch->zip).'  '.s($sch->city);
-			$contact = new html_table();
+
 			//$contact->head = array('');
-			$contact->data = array();
-			if(!empty($sch->phone)) {
-				$contact->data[] = array(s($sch->phone));
-			}
+			$contact = array();
 			if(!empty($sch->email)) {
-				$contact->data[] = array(s($sch->email));
+				$contact[] = s($sch->email);
+			}
+			if(!empty($sch->phone)) {
+				$contact[] = s($sch->phone);
 			}
 			if(!empty($sch->website)) {
-				$contact->data[] = array(s($sch->website));
+				$contact[] = s($sch->website);
 			}
+			$contact = html_writer::tag('p', implode("<br>", $contact));
 			$schooltype =  constant('PRAXE_SCHOOL_TYPE_'.(int)$sch->type.'_TEXT');
-			$contact = html_writer::table($contact);
 			$table->data[] = array($schname, $schooltype, $address, $contact);
 		}
 		return html_writer::table($table);

@@ -208,7 +208,7 @@ function praxe_get_locations($isced = 0, $studyfield = null, $active = null, $bO
 
 	return count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql);
 }
-function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOnlyActual = 0, $year = 0) {
+function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOnlyActual = 0, $year = 0, $sort = '') {
 	global $CFG, $DB;
 	$sql = "SELECT loc.*, school.name, school.street, school.city, school.zip, school.headmaster, school.email, school.phone, school.website,
 				head.firstname as head_name, head.lastname as head_lastname,
@@ -250,8 +250,11 @@ function praxe_get_locations_by_schooldata($schoolid = null, $headm = null, $bOn
 	if(count($where)) {
 		$sql .= " WHERE ".implode(" AND ",$where);
 	}
+	if(trim($sort) !== '') {
+		$sql .= " ORDER BY ".$sort;
+	}
 
-	return count($params) ? $DB->get_records_sql($sql,$params) : $DB->get_records_sql($sql);
+	return $DB->get_records_sql($sql,$params);
 }
 /**
  * Return result of get_record_sql. Includes data of headmaster, external teacher and school.
@@ -675,8 +678,15 @@ function praxe_get_use_status_of_location($locid, $year=null) {
  */
 function praxe_get_user_fullname($user) {
 	global $USER, $context, $CFG, $course, $DB;
+	$additionalFields = array('firstnamephonetic', 'lastnamephonetic', 'middlename','alternatename');
 	if(!is_object($user)) {
 		$user = $DB->get_record('user',array('id'=>(int)$user));
+	}else {
+		foreach($additionalFields as $field) {
+			if(!isset($user->{$field})) {
+				$user->{$field} = '';
+			}
+		}
 	}
 	if(!is_object($user)) {
 		return false;
