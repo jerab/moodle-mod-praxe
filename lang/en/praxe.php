@@ -82,6 +82,7 @@ $string['extteacher'] = 'External teacher';
 $string['filter'] = 'Filter';
 $string['gotoinspection'] = 'Go to inspection';
 $string['headmaster'] = 'Headmaster';
+$string['informparticipants'] = 'Send message to participants';
 $string['inprocess'] = 'In process';
 $string['inspection'] = 'Teacher visit';
 $string['iscedlevel'] = 'ISCED level';

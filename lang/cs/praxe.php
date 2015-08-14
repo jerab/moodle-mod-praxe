@@ -67,6 +67,7 @@ $string['filter'] = 'Filtrovat';
 $string['gotoinspection'] = 'Jít na hospitaci';
 $string['to_create_location_choose_school'] = 'Pro vytvoření nové nabídky vyberte konkrétní školu.';
 $string['headmaster'] = 'Ředitel';
+$string['informparticipants'] = 'Informovat účastníky';
 $string['inprocess'] = 'V procesu zpracování';
 $string['inspection'] = 'Návšteva vyučujícího';
 $string['iscedlevel'] = 'Stupeň ISCED';
@@ -197,5 +198,4 @@ $string['you_confirmed_location'] = 'Potvrdil(a) jste zařazení studenta k Vám
 $string['you_refused_location'] = 'Odmítl(a) jste žádost studenta o zařazení k Vám na praxi.';
 $string['you_should_create_schedule'] = 'Nyní si vytvoř rozvrh hodin';
 $string['zipcode'] = 'PSČ';
-
 ?>
