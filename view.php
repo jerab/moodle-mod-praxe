@@ -90,6 +90,15 @@ if(!is_null($post_form)) {
 	require_once($CFG->dirroot . '/mod/praxe/post.php');
 }
 
+/** $sentForm can be set in post.php if the form was sent with errors - in view_... there is no more created instance of custom mform.
+ * It has to be set as global var in c_classes.
+ *  @see c_makeschedule for example
+ */
+
+if(!isset($sentForm)) {
+	$sentForm = null;
+}
+
 echo $OUTPUT->header();
 /// Print the main part of the page
 echo "<script type=\"text/javascript\" src=\"praxe.js\"></script>";

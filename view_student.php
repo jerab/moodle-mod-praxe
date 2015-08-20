@@ -12,7 +12,7 @@ class praxe_view_student extends praxe_view {
 	public $form = null;
 
 	function praxe_view_student() {
-		global $CFG, $tab, $tab_modes, $context, $DB;
+		global $CFG, $tab, $tab_modes, $context, $DB, $sentForm;
 		$viewaction = optional_param('viewaction',null, PARAM_ALPHA);
 		$schoolid = optional_param('schoolid',0,PARAM_INT);
 		if($viewaction == 'viewschool' && $schoolid) {
@@ -99,17 +99,26 @@ class praxe_view_student extends praxe_view {
 					}
 					break;
 				case PRAXE_TAB_STUDENT_ADDSCHEDULE :
-					require_capability('mod/praxe:addstudentschedule', $context);
-					require_once($CFG->dirroot . '/mod/praxe/c_makeschedule.php');
-					$this->form = new praxe_makeschedule();
-					if(!is_null(optional_param('edit',null,PARAM_TEXT))) {
-						$scheduleid = optional_param('scheduleid',0,PARAM_INT);
-						if($schedule = $DB->get_record('praxe_schedules', array('id' => $scheduleid, 'record' => praxe_record::getData('rec_id')))) {
-							if(!$this->form->set_form_to_edit($schedule)) {
-								$this->form->add_to_content(get_string('date_of_schedule_has_expired','praxe')."<br>".get_string('noeditableitem','praxe'), true);
+					if(is_object($sentForm)) {
+						if(!is_null(optional_param('edit',null,PARAM_TEXT))) {
+							$scheduleid = optional_param('scheduleid',0,PARAM_INT);
+							$sentForm->set_form_to_edit((object)array('id' => $scheduleid));
+						}
+						$sentForm->display_content_before();
+						$sentForm->display();
+					}else {
+						require_capability('mod/praxe:addstudentschedule', $context);
+						require_once($CFG->dirroot . '/mod/praxe/c_makeschedule.php');
+						$this->form = new praxe_makeschedule();
+						if(!is_null(optional_param('edit',null,PARAM_TEXT))) {
+							$scheduleid = optional_param('scheduleid',0,PARAM_INT);
+							if($schedule = $DB->get_record('praxe_schedules', array('id' => $scheduleid, 'record' => praxe_record::getData('rec_id')))) {
+								if(!$this->form->set_form_to_edit($schedule)) {
+									$this->form->add_to_content(get_string('date_of_schedule_has_expired','praxe')."<br>".get_string('noeditableitem','praxe'), true);
+								}
+							}else {
+								print_error('notallowedaction', 'praxe');
 							}
-						}else {
-							print_error('notallowedaction', 'praxe');
 						}
 					}
 					break;

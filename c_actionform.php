@@ -12,13 +12,25 @@ class praxe_actionform extends moodleform {
 	protected $content_before_form = '';
 	public $error = null;
 
-	function praxe_actionform($action = false) {
+	function praxe_actionform($action = false, $mode = null) {
 		global $cm;
+		$link = 'view.php?id='.$cm->id;
 		if($action) {
-			parent::moodleform("view.php?id=$cm->id&action=$action");
-		}else{
-			parent::moodleform("view.php?id=$cm->id");
+			$link .= "&action=$action";
 		}
+		if($mode) {
+			$link .= "&mode=$mode";
+		}
+		parent::moodleform($link);
+	}
+
+	/**
+	 * @see moodleform::validation()
+	 * @param array $data array of ("fieldname"=>value) of submitted data
+	 * @param array $files
+	 */
+	public function validation($data, $files = array()) {
+
 	}
 
 	protected function definition() {
