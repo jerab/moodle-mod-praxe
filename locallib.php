@@ -708,9 +708,11 @@ function praxe_get_user_fullname($user) {
 }
 function praxe_get_yearclass($yearclass) {
 	$yc = $yearclass;
-	if($yearclass >= 6 && $yearclass <= 9) {
+	if($yearclass >= 1 && $yearclass <= 5) {
+		$yc = PRAXE_ISCED_1_TEXT." - $yc.";
+	}elseif($yearclass >= 6 && $yearclass <= 9) {
 		$yc = PRAXE_ISCED_2_TEXT." - $yc.";
-	}else if($yearclass >= 10) {
+	}elseif($yearclass >= 10) {
 		$yc = PRAXE_ISCED_3_TEXT.' - '.($yc-9).".";
 	}
 	return $yc;

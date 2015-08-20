@@ -309,32 +309,40 @@
 				$aErrors = array();
 				require_capability('mod/praxe:addstudentschedule', $context);
 
-				$post->record = praxe_record::getData('rec_id');
-				$timestart = required_param_array('timestart', PARAM_INT);
-				$timeend = required_param_array('timeend', PARAM_INT);
-				$post->timestart = mktime($timestart['hour'],$timestart['minute'], null, $timestart['month'],$timestart['day'],$timestart['year']);
-				$post->timeend = mktime($timeend['hour'],$timeend['minute'], null, $timeend['month'],$timeend['day'],$timeend['year']);
+				require_once 'c_makeschedule.php';
+				$form = new praxe_makeschedule();
 
-				if($post->timestart > $post->timeend || $post->timestart < time()+60*60*24) {
-					$aErrors[] = get_string('error_timeschedule','praxe');
-					//redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_timeschedule','praxe'));
-				}
+				if($fdata = $form->get_data()) {
+					if($fdata->lesnumber == -1) {
+						$fdata->lesnumber = null;
+					}
+					$post = (object)array('timestart' => $fdata->timestart,
+											'timeend' => $fdata->timeend,
+							'lesnumber' => $fdata->lesnumber,
+							'yearclass' => $fdata->yearclass,
+							'schoolroom' => $fdata->schoolroom,
+							'lessubject' => $fdata->lessubject,
+							'lestheme' => $fdata->lestheme['text']);
+    				$post->record = praxe_record::getData('rec_id');
 
-				$post->yearclass = required_param('yearclass',PARAM_INT);
-				$post->lessubject = required_param('lessubject',PARAM_TEXT);
-				$post->lesnumber = optional_param('lesnumber', null, PARAM_INT);
-				if($post->lesnumber == -1) {
-					$post->lesnumber = null;
-				}
-				$post->schoolroom = required_param('schoolroom',PARAM_TEXT);
-				if(trim($post->schoolroom) == '') {
-					$aErrors[] = get_string('error_schoolroom','praxe');
-					//redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), get_string('error_schoolroom','praxe'));
-				}
-				$post->lestheme = optional_param_array('lestheme','',PARAM_RAW);
-				$post->lestheme = $post->lestheme['text'];
-
-				if(count($aErrors)) {
+    				$redurl = praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
+    				/// insert record ///
+    				if(empty($edit)) {
+    					$post->timecreated = time();
+    					if($DB->insert_record('praxe_schedules', $post)){
+    						redirect($redurl, get_string('schedule_item_added','praxe'));
+    					}
+    				}else{
+    					$post->id = required_param('scheduleid',PARAM_INT);
+    					$post->timemodified = time();
+    					if($DB->update_record('praxe_schedules',$post)) {
+    						redirect($redurl, get_string('schedule_updated','praxe'));
+    					}
+    				}
+				}else {
+					$sentForm = $form;
+					//$form->display();
+					/*
 					if(!empty($edit)) {
 						redirect(praxe_get_base_url(array(	'mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE],
 															'edit' => 'editschedule',
@@ -342,23 +350,8 @@
 								implode(', ', $aErrors));
 					}else {
 						redirect(praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_ADDSCHEDULE])), implode(', ', $aErrors));
-					}
+					}*/
 				}
-				$redurl = praxe_get_base_url(array('mode'=>$tab_modes['student'][PRAXE_TAB_STUDENT_SCHEDULE]));
-				/// insert record ///
-				if(empty($edit)) {
-					$post->timecreated = time();
-					if($DB->insert_record('praxe_schedules', $post)){
-						redirect($redurl, get_string('schedule_item_added','praxe'));
-					}
-				}else{
-					$post->id = required_param('scheduleid',PARAM_INT);
-					$post->timemodified = time();
-					if($DB->update_record('praxe_schedules',$post)) {
-						redirect($redurl, get_string('schedule_updated','praxe'));
-					}
-				}
-
 				break;
 			default:
 				break;
